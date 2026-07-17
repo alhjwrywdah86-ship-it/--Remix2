@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Amiri", "Playfair Display", Georgia, serif;
+  --font-sans: "IBM Plex Sans Arabic", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-ivory: #FAF8F5;
+  --color-charcoal: #1A365D;
+  --color-amber-gold: #C5A021;
+  --color-autumn-yellow: #C5A021;
+  --color-brand-blue: #1A365D;
+  --color-brand-gold: #C5A021;
+}
+
+/* Premium Academic / Editorial Styles */
+body {
+  background-color: #F8FAFC;
+  color: #1A365D;
+  font-family: var(--font-sans);
+}
+
+/* Elegant Slate Cards with Gold Glow */
+.paper-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  border-radius: 0.75rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.paper-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(26, 54, 93, 0.08), 0 4px 6px -4px rgba(26, 54, 93, 0.08);
+  border-color: rgba(197, 160, 33, 0.4);
+}
+
+/* Refined Buttons */
+.paper-btn {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  color: #1A365D;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+
+.paper-btn:hover {
+  background-color: rgba(197, 160, 33, 0.08);
+  border-color: #C5A021;
+  color: #1A365D;
+}
+
+.paper-btn:active {
+  transform: translateY(1px);
+}
+
+.paper-btn-primary {
+  background-color: #C5A021;
+  border: 1px solid #C5A021;
+  color: #1A365D;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  box-shadow: 0 2px 4px 0 rgba(197, 160, 33, 0.2);
+  transition: all 0.15s ease;
+}
+
+.paper-btn-primary:hover {
+  background-color: #b08f1b;
+  border-color: #b08f1b;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(197, 160, 33, 0.3);
+}
+
+.paper-btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* Custom Scrollbar for professional academic feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F8FAFC;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C5A021;
+  border-radius: 3px;
+}
+
+/* Responsive custom spacing */
+.animate-fade-in {
+  animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

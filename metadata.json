@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: المعلم العربي المحترف",
+  "description": "منصة المعلم العربي المحترف - أداة ذكية متكاملة لتوليد خطط الدروس، عروض PowerPoint، إدارة سجل الطلاب، والتلخيص الذكي بمناهج اليمن والوطن العربي.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
