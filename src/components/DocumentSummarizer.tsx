@@ -378,8 +378,18 @@ export default function DocumentSummarizer({ lang }: DocumentSummarizerProps) {
         if (selectedBookForChat === id) setSelectedBookForChat("all");
         if (selectedBookForSum === id) setSelectedBookForSum("custom");
       } else {
-        const data = await res.json();
-        alert(data.error || "Failed to delete");
+        let errMsg = isAr ? "فشل حذف الكتاب." : "Failed to delete";
+        try {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await res.json();
+            errMsg = data.error || errMsg;
+          } else {
+            const txt = await res.text();
+            errMsg = txt.substring(0, 300) || errMsg;
+          }
+        } catch (_) {}
+        alert(errMsg);
       }
     } catch (err) {
       console.error(err);

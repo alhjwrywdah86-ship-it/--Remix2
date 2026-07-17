@@ -40,7 +40,14 @@ function cleanAndParseJson(text: string): any {
 }
 
 // تهيئة عميل الذكاء الاصطناعي من جوجل باستخدام مفتاح الأمان المتوفر في البيئة
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ 
+  apiKey: process.env.GEMINI_API_KEY,
+  httpOptions: {
+    headers: {
+      "User-Agent": "aistudio-build"
+    }
+  }
+});
 
 // حارس التحقق من وجود مفتاح الأمان
 const checkApiKey = (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -66,7 +73,8 @@ const handleGeminiError = (error: any, res: express.Response) => {
     error.code === "503";
 
   if (isTransient) {
-    return res.status(503).json({
+    // نستخدم الكود 429 بدلاً من 503 لتجنب اعتراض خوادم وموجهات الاستضافة (Railway/Nginx) للملفات وإرجاع صفحات HTML بديلة
+    return res.status(429).json({
       error: "النموذج الذكي يواجه ضغطاً كبيراً مؤقتاً في الخدمة. ندعوك للتأمل لثوانٍ معدودة والمحاولة مجدداً؛ فالعودة الهادئة للواقع تصفي الذهن وتجلب الطمأنينة.\n\nThe AI model is temporarily experiencing high demand. We invite you to pause, take a deep breath for a few seconds, and try again; a calm return to reality always clears the mind and brings clarity."
     });
   }
@@ -715,6 +723,20 @@ ${textToAnalyze.slice(0, 15000)}
   } catch (error: any) {
     return handleGeminiError(error, res);
   }
+});
+
+// --- معالجة المسارات غير الموجودة للأي بي آي وحماية الأخطاء العامة ---
+app.all("/api/*", (req, res) => {
+  res.status(404).json({
+    error: `المسار المطلوب غير موجود في الخادم / The requested API endpoint '${req.path}' was not found.`
+  });
+});
+
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error("خطأ عام غير معالج في السيرفر:", err);
+  res.status(res.statusCode === 200 ? 500 : res.statusCode).json({
+    error: err.message || "حدث خطأ غير متوقع في الخادم / An unexpected server error occurred."
+  });
 });
 
 // --- إعداد تشغيل الواجهة الأمامية الفورية عبر Vite ---
