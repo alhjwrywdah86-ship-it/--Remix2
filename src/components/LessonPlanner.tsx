@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import pptxgen from "pptxgenjs";
 import { PRELOADED_CURRICULUM } from "../data/curriculumData";
+import { fetchWithRetry } from "../utils/fetchWithRetry";
 
 interface LessonPlannerProps {
   lang: Language;
@@ -49,6 +50,8 @@ const GRADE_LEVELS_AR = [
   "الصف الثامن الأساسي",
   "الصف التاسع الأساسي",
   "الصف الأول الثانوي",
+  "الصف الثاني الثانوي",
+  "الصف الثالث الثانوي",
 ];
 
 const GRADE_LEVELS_EN = [
@@ -56,6 +59,8 @@ const GRADE_LEVELS_EN = [
   "8th Grade Primary",
   "9th Grade Primary",
   "10th Grade Secondary",
+  "11th Grade Secondary",
+  "12th Grade Secondary",
 ];
 
 function getFallbackTopicText(country: string, grade: string, subject: string, isAr: boolean): string {
@@ -86,6 +91,12 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
   const [curriculum, setCurriculum] = useState(isAr ? "المنهج اليمني الرسمي" : "Yemeni Standard Curriculum");
   const [duration, setDuration] = useState("45");
   const [customNotes, setCustomNotes] = useState("");
+
+  // Quiz, Activity & Mindmap customization options
+  const [questionType, setQuestionType] = useState("mixed");
+  const [questionsCount, setQuestionsCount] = useState("10");
+  const [activitiesStrategy, setActivitiesStrategy] = useState("all");
+  const [retryStatus, setRetryStatus] = useState<string | null>(null);
 
   // UI & Loading States
   const [loading, setLoading] = useState(false);
@@ -132,37 +143,40 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
     setError(null);
     setPlan(null);
     setShowAnswerKey(false);
+    setRetryStatus(null);
 
     try {
-      const response = await fetch("/api/gemini/lesson-plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          subject,
-          grade,
-          topic,
-          curriculum,
-          duration,
-          language: lang,
-          customNotes,
-          preloadedLessonId: selectedLessonId,
-        }),
-      });
-
-      if (!response.ok) {
-        let errMsg = isAr ? "فشل توليد خطة الدرس التعليمية." : "Failed to generate educational package";
-        try {
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const errData = await response.json();
-            errMsg = errData.error || errMsg;
-          } else {
-            const txt = await response.text();
-            errMsg = txt.substring(0, 300) || errMsg;
-          }
-        } catch (_) {}
-        throw new Error(errMsg);
-      }
+      const response = await fetchWithRetry(
+        "/api/gemini/lesson-plan",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subject,
+            grade,
+            topic,
+            curriculum,
+            duration,
+            language: lang,
+            customNotes,
+            preloadedLessonId: selectedLessonId,
+            questionType,
+            questionsCount,
+            activitiesStrategy,
+          }),
+        },
+        3,
+        1500,
+        2,
+        (attempt, delayMs, errorMsg) => {
+          const sec = (delayMs / 1000).toFixed(1);
+          setRetryStatus(
+            isAr
+              ? `السيرفر مشغول حالياً بضغط مؤقت (${errorMsg}). جاري إعادة المحاولة تلقائياً (المحاولة ${attempt} من 3) خلال ${sec} ثانية... يرجى عدم إغلاق الصفحة.`
+              : `Server is temporarily busy (${errorMsg}). Retrying automatically (Attempt ${attempt} of 3) in ${sec}s... Please stay on this page.`
+          );
+        }
+      );
 
       const data = await response.json();
       setPlan(data);
@@ -173,6 +187,7 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
       setError(err.message || "An error occurred while generating the plan.");
     } finally {
       setLoading(false);
+      setRetryStatus(null);
     }
   };
 
@@ -182,37 +197,40 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
     setError(null);
     setPlan(null);
     setShowAnswerKey(false);
+    setRetryStatus(null);
 
     try {
-      const response = await fetch("/api/gemini/lesson-plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          subject,
-          grade,
-          topic,
-          curriculum,
-          duration,
-          language: lang,
-          customNotes,
-          preloadedLessonId: selectedLessonId,
-        }),
-      });
-
-      if (!response.ok) {
-        let errMsg = isAr ? "فشل توليد العرض التقديمي للدرس." : "Failed to generate lesson presentation";
-        try {
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const errData = await response.json();
-            errMsg = errData.error || errMsg;
-          } else {
-            const txt = await response.text();
-            errMsg = txt.substring(0, 300) || errMsg;
-          }
-        } catch (_) {}
-        throw new Error(errMsg);
-      }
+      const response = await fetchWithRetry(
+        "/api/gemini/lesson-plan",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subject,
+            grade,
+            topic,
+            curriculum,
+            duration,
+            language: lang,
+            customNotes,
+            preloadedLessonId: selectedLessonId,
+            questionType,
+            questionsCount,
+            activitiesStrategy,
+          }),
+        },
+        3,
+        1500,
+        2,
+        (attempt, delayMs, errorMsg) => {
+          const sec = (delayMs / 1000).toFixed(1);
+          setRetryStatus(
+            isAr
+              ? `السيرفر مشغول حالياً بضغط مؤقت (${errorMsg}). جاري إعادة المحاولة تلقائياً (المحاولة ${attempt} من 3) خلال ${sec} ثانية... يرجى عدم إغلاق الصفحة.`
+              : `Server is temporarily busy (${errorMsg}). Retrying automatically (Attempt ${attempt} of 3) in ${sec}s... Please stay on this page.`
+          );
+        }
+      );
 
       const data = await response.json();
       setPlan(data);
@@ -224,6 +242,7 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
       setError(err.message || "An error occurred while generating the PowerPoint presentation.");
     } finally {
       setLoading(false);
+      setRetryStatus(null);
     }
   };
 
@@ -601,6 +620,61 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
               />
             </div>
 
+            {/* Exam Generation Customizer */}
+            <div className="bg-[#FAF8F5] p-3 border-2 border-charcoal space-y-2 rounded">
+              <span className="block font-serif font-bold text-[#C5A021] text-[11px]">
+                {isAr ? "📝 تخصيص وحدة الاختبارات المقترحة:" : "📝 Customize Suggested Quiz Unit:"}
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="space-y-1">
+                  <label className="block font-bold text-charcoal">{isAr ? "نوع الأسئلة:" : "Question Type:"}</label>
+                  <select
+                    value={questionType}
+                    onChange={(e) => setQuestionType(e.target.value)}
+                    className="w-full bg-white border border-charcoal p-1 focus:outline-none cursor-pointer font-sans"
+                  >
+                    <option value="mixed">{isAr ? "مختلط (شامل)" : "Mixed (All)"}</option>
+                    <option value="mcq">{isAr ? "اختيار من متعدد" : "Multiple Choice"}</option>
+                    <option value="true_false">{isAr ? "صح وخطأ" : "True / False"}</option>
+                    <option value="essay">{isAr ? "أسئلة مقالية وقصيرة" : "Essay & Short Answers"}</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="block font-bold text-charcoal">{isAr ? "عدد الأسئلة:" : "Questions Count:"}</label>
+                  <select
+                    value={questionsCount}
+                    onChange={(e) => setQuestionsCount(e.target.value)}
+                    className="w-full bg-white border border-charcoal p-1 focus:outline-none cursor-pointer font-sans"
+                  >
+                    <option value="5">5 {isAr ? "أسئلة" : "Questions"}</option>
+                    <option value="10">10 {isAr ? "أسئلة" : "Questions"}</option>
+                    <option value="15">15 {isAr ? "سؤالاً" : "Questions"}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Activities Customizer */}
+            <div className="bg-[#FAF8F5] p-3 border-2 border-charcoal space-y-2 rounded">
+              <span className="block font-serif font-bold text-[#C5A021] text-[11px]">
+                {isAr ? "🎲 تخصيص إستراتيجية الأنشطة:" : "🎲 Customize Activities Strategy:"}
+              </span>
+              <div className="space-y-1 text-[11px]">
+                <label className="block font-bold text-charcoal">{isAr ? "إستراتيجية التعلم النشط المفضلة:" : "Active Learning Strategy:"}</label>
+                <select
+                  value={activitiesStrategy}
+                  onChange={(e) => setActivitiesStrategy(e.target.value)}
+                  className="w-full bg-white border border-charcoal p-1 focus:outline-none cursor-pointer font-sans text-[11px]"
+                >
+                  <option value="all">{isAr ? "توليد جميع الإستراتيجيات" : "Generate All Strategies"}</option>
+                  <option value="cooperative">{isAr ? "التعلم التعاوني وعمل المجموعات" : "Cooperative & Group Work"}</option>
+                  <option value="hot_seat">{isAr ? "الكرسي الساخن وفكر-شارك-زميل" : "Hot Seat & Think-Pair-Share"}</option>
+                  <option value="role_play">{isAr ? "لعب الأدوار والعصف الذهني" : "Role Play & Brainstorming"}</option>
+                  <option value="unplugged">{isAr ? "ألعاب تعليمية وأنشطة ملموسة" : "Educational Games & Tangible Tasks"}</option>
+                </select>
+              </div>
+            </div>
+
             {/* Special Instructions */}
             <div className="space-y-1">
               <label className="block font-bold text-charcoal">{isAr ? "توجيهات وضاح الإضافية:" : "Special Instructions:"}</label>
@@ -674,6 +748,11 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
                     ? "يقوم Gemini بربط أهداف المنهج، وتوليد أسئلة الاختبار النموذجي، واقتراح ألعاب صفية ملموسة، ورسم هيكل السبورة."
                     : "Connecting educational goals with outdoor tasks and blackboard designs in standard JSON format."}
                 </p>
+                {retryStatus && (
+                  <div className="p-3 bg-autumn-yellow/15 border-2 border-charcoal text-xs text-charcoal font-sans rounded max-w-md mx-auto mt-4 shadow-[2px_2px_0px_0px_#1A1A1A] animate-bounce">
+                    <strong>{isAr ? "💡 ملاحظة الاتصال:" : "💡 Connection Note:"}</strong> {retryStatus}
+                  </div>
+                )}
               </div>
             </div>
           )}

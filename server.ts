@@ -49,6 +49,64 @@ const ai = new GoogleGenAI({
   }
 });
 
+// دالة مساعدة لتكرار محاولات الاتصال بـ Gemini مع التراجع الأسي في حال وجود ضغط مؤقت أو 503، ودعم التبديل التلقائي بين النماذج لضمان الخدمة المستمرة
+async function generateContentWithRetry(params: any, retries = 2, delay = 1000): Promise<any> {
+  const modelsToTry = [
+    params.model,
+    "gemini-2.5-flash",
+    "gemini-1.5-flash",
+    "gemini-2.5-pro",
+    "gemini-1.5-pro"
+  ].filter((m, index, self) => m && self.indexOf(m) === index);
+
+  let lastError: any = null;
+
+  for (const model of modelsToTry) {
+    console.log(`[Backend Gemini] Attempting content generation with model: ${model}`);
+    const currentParams = { ...params, model };
+    let currentDelay = delay;
+    
+    for (let attempt = 1; attempt <= retries + 1; attempt++) {
+      try {
+        return await ai.models.generateContent(currentParams);
+      } catch (error: any) {
+        lastError = error;
+        const errMsg = (error.message || "").toString().toLowerCase();
+        const isTransient = 
+          errMsg.includes("503") || 
+          errMsg.includes("unavailable") || 
+          errMsg.includes("high demand") || 
+          errMsg.includes("busy") ||
+          errMsg.includes("overloaded") ||
+          errMsg.includes("429") ||
+          errMsg.includes("rate limit") ||
+          errMsg.includes("resource exhausted") ||
+          error.status === "UNAVAILABLE" || 
+          error.code === 503 ||
+          error.code === "503" ||
+          error.status === 429 ||
+          error.code === 429;
+
+        if (!isTransient) {
+          // إذا كان خطأً بنيوياً أو في التركيب، لا داعي لمحاولة نموذج آخر، بل نرمي الخطأ مباشرة
+          throw error;
+        }
+
+        console.warn(`[Backend Gemini] Model ${model} Attempt ${attempt} Failed: ${error.message || error}.`);
+        
+        if (attempt <= retries) {
+          console.warn(`Retrying ${model} in ${currentDelay}ms...`);
+          await new Promise((resolve) => setTimeout(resolve, currentDelay));
+          currentDelay *= 1.5;
+        }
+      }
+    }
+    console.warn(`[Backend Gemini] Model ${model} failed all retries. Falling back to the next available model...`);
+  }
+
+  throw lastError || new Error("Failed after trying all models and retries");
+}
+
 // حارس التحقق من وجود مفتاح الأمان
 const checkApiKey = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (!process.env.GEMINI_API_KEY) {
@@ -110,15 +168,33 @@ const booksDb: Map<string, BookMeta> = new Map([
   ]
 ]);
 
-// قاعدة بيانات مصغرة ومثبتة للمناهج اليمنية لضمان دقة الإجابة
+// قاعدة بيانات مصغرة ومثبتة للمناهج اليمنية لضمان دقة الإجابة وبث الروح الوجدانية والتأملية لرسالة المعلم
 const yemeniCurriculumData: Record<string, string> = {
-  "9-arabic": `منهج اللغة العربية - الصف التاسع - الجزء الأول - الجمهورية اليمنية:
-  - الوحدة الأولى: من هدي القرآن الكريم (سورة لقمان - آيات الحكمة والتربية الأخلاقية). المفردات البلاغية: التشبيه، قيم بر الوالدين، خفض الصوت.
-  - الوحدة الثانية: قيم وطنية وقراءة أدبية عن هوية اليمن الحضارية والتاريخية.
+  "7-arabic": `منهج اللغة العربية - الصف السابع - الجمهورية اليمنية:
+  - الدرس الأول: أثر الكلمة الطيبة وحفظ اللسان وقيم التسامح المباشر.
+  - الدرس الثاني: التعاون والتكافل في القرية اليمنية والمدرجات الزراعية.
+  - القواعد المقررة: أقسام الكلام، الجملة الفعلية، الفاعل ومرفوعات الأسماء.`,
+  "8-arabic": `منهج اللغة العربية - الصف الثامن - الجمهورية اليمنية:
+  - الدرس الأول: البن اليمني المجيد (زراعة البن في ريف اليمن وأثره الاقتصادي والوجداني، قيم الاعتماد على الذات وتجنب الاستهلاك الرقمي السلبي).
+  - الدرس الثاني: قصيدة الحنين إلى الوطن لأبي تمام والارتباط بتراب الأجداد وسرد الحكايات الورقية.
+  - القواعد النحوية: الجملة الاسمية ونواسخها (كان وأخواتها، إن وأخواتها).`,
+  "9-arabic": `منهج اللغة العربية - الصف التاسع - الجمهورية اليمنية:
+  - الدرس الأول: من هدي القرآن الكريم (سورة لقمان - آيات الحكمة والتربية الأخلاقية والأسرية المباشرة). المفردات البلاغية: التشبيه، قيم بر الوالدين، خفض الصوت.
+  - الدرس الثاني: أصالة الخط العربي والجمال اليدوي الورقي، تنمية الصبر والملاحظة الحسية عبر تذوق نقوش الخط.
+  - الدرس الثالث: وصية الآباء للتمسك بالقيم الملموسة والآداب والموروث الحضاري.
   - القواعد النحوية المقررة: التوابع (النعت، العطف، التوكيد، البدل).`,
-  "8-arabic": `منهج اللغة العربية - الصف الثامن - الجزء الأول - الجمهورية اليمنية:
-  - الدرس الأول: البن اليمني المجيد (زراعة البن في ريف اليمن وأثره الاقتصادي والوجداني، قيم الاعتماد على الذات).
-  - القواعد النحوية: الجملة الاسمية ونواسخها.`
+  "10-arabic": `منهج اللغة العربية - الصف الأول الثانوي - الجمهورية اليمنية:
+  - الدرس الأول: ربيع الأرض والقصيدة الورقية للشاعر عبد الله البردوني. تذوق الطبيعة والاندماج مع الفصول الحية بعيداً عن صخب التكنولوجيا.
+  - الدرس الثاني: الفخر بالأجداد وحضارة سبأ وحمير، معجزة سد مأرب وإعمار الأرض والتحكم بالسيادة الذاتية والمياه.
+  - القواعد النحوية والبلاغية: علم المعاني (أساليب التوكيد الفصيح)، المبتدأ والخبر وتقدم الخبر جوازاً ووجوباً.`,
+  "11-arabic": `منهج اللغة العربية - الصف الثاني الثانوي - الجمهورية اليمنية:
+  - الدرس الأول: القيم الروحية والجمال الإنساني في الموشحات اليمنية والأناشيد الصنعانية العتيقة.
+  - الدرس الثاني: أدب الكفاح والتحرر الوطني في أعمال الفضول (الشاعر عبد الله عبد الوهاب نعمان)، والاعتزاز بصلابة الأرض وعزة السيادة الترابية.
+  - القواعد النحوية والبلاغية: البديع والمحسنات اللفظية، جزم الفعل المضارع وصيغ الأمر والنهي البلاغية.`,
+  "12-arabic": `منهج اللغة العربية - الصف الثالث الثانوي - الجمهورية اليمنية:
+  - الدرس الأول: بناء الهوية الفكرية والأدبية في المقامات اليمنية وأعمال علي أحمد باكثير التاريخية والروائية.
+  - الدرس الثاني: لغة الصحافة والخطابة الرسمية وتأثيرها الاجتماعي والوجداني والمسؤولية الأخلاقية للكلمة المطبوعة.
+  - القواعد النحوية والبلاغية: أساليب النداء والتعجب، المدح والذم، بلاغة الإطناب والمساواة والتركيب الحواري.`
 };
 
 // --- مسار المكتبة المنهجية الجاهزة والوحدات المتكاملة (تحضير الدرس) ---
@@ -132,7 +208,10 @@ app.post("/api/gemini/lesson-plan", checkApiKey, async (req, res) => {
       topic,
       duration, 
       language, 
-      customNotes 
+      customNotes,
+      questionType,
+      questionsCount,
+      activitiesStrategy
     } = req.body;
 
     const actualLessonTitle = lessonTitle || topic;
@@ -141,14 +220,16 @@ app.post("/api/gemini/lesson-plan", checkApiKey, async (req, res) => {
       return res.status(404).json({ error: "يرجى إدخال عنوان الدرس أولاً." });
     }
 
-    const systemInstruction = `أنت مستشار تربوي محترف وخبير في المناهج التعليمية العربية واليمنية وإستراتيجيات التعلم النشط والتأملي.`;
+    const systemInstruction = `أنت مستشار تربوي محترف وخبير في المناهج التعليمية العربية واليمنية وإستراتيجيات التعلم النشط والتأملي بأسلوب الكاتب وضاح زليل الذي يدعو للحد من تشتيت الشاشات والعودة للواقع الحسي والورقي والسبورة التقليدية.`;
 
     // جلب المنهج الحقيقي الثابت إذا كان المنهج المختار هو اليمن
     let normalizedGrade = grade || "";
-    if (normalizedGrade.includes("التاسع") || normalizedGrade.includes("9")) normalizedGrade = "9";
+    if (normalizedGrade.includes("الثاني الثانوي") || normalizedGrade.includes("11")) normalizedGrade = "11";
+    else if (normalizedGrade.includes("الثالث الثانوي") || normalizedGrade.includes("12")) normalizedGrade = "12";
+    else if (normalizedGrade.includes("الأول الثانوي") || normalizedGrade.includes("10")) normalizedGrade = "10";
+    else if (normalizedGrade.includes("التاسع") || normalizedGrade.includes("9")) normalizedGrade = "9";
     else if (normalizedGrade.includes("الثامن") || normalizedGrade.includes("8")) normalizedGrade = "8";
     else if (normalizedGrade.includes("السابع") || normalizedGrade.includes("7")) normalizedGrade = "7";
-    else if (normalizedGrade.includes("الأول الثانوي") || normalizedGrade.includes("10")) normalizedGrade = "10";
 
     let normalizedSubject = subject || "";
     if (normalizedSubject.includes("العربية") || normalizedSubject.includes("arabic")) normalizedSubject = "arabic";
@@ -160,7 +241,7 @@ app.post("/api/gemini/lesson-plan", checkApiKey, async (req, res) => {
     const curriculumKey = `${normalizedGrade}-${normalizedSubject}`;
     let curriculumContext = "اعتماداً على المعايير التربوية العامة للمنهج المختار.";
 
-    if (country === "اليمن") {
+    if (country === "اليمن" || country === "Yemen") {
       if (yemeniCurriculumData[curriculumKey]) {
         curriculumContext = yemeniCurriculumData[curriculumKey];
       } else if (yemeniCurriculumData[`${grade}-${subject}`]) {
@@ -168,40 +249,86 @@ app.post("/api/gemini/lesson-plan", checkApiKey, async (req, res) => {
       }
     }
 
-    const prompt = `قم بتحضير وتوليد خطة درس متكاملة بناءً على المعطيات التالية:
+    const qTypeDesc = questionType === "mcq" ? "اختيار من متعدد فقط" :
+                    questionType === "true_false" ? "صح وخطأ فقط" :
+                    questionType === "essay" ? "أسئلة مقالية وقصيرة فقط" : "مزيج متوازن من الأسئلة المقالية والصح والخطأ والاختيار من متعدد";
+
+    const questionsNum = questionsCount || "10";
+
+    const strategyDesc = activitiesStrategy === "cooperative" ? "التركيز الكامل على التعلم التعاوني وتقسيم المجموعات" :
+                         activitiesStrategy === "hot_seat" ? "التركيز على إستراتيجية الكرسي الساخن وفكر-شارك-زميل" :
+                         activitiesStrategy === "role_play" ? "التركيز على لعب الأدوار الإبداعي والعصف الذهني الصفي" :
+                         activitiesStrategy === "unplugged" ? "التركيز على الألعاب التعليمية البدنية والأنشطة الملموسة بدون شاشات" : "مزيج تفاعلي من جميع الإستراتيجيات الورقية والحركية";
+
+    const prompt = `قم بتحضير وتوليد خطة درس بيداغوجية متكاملة بأسلوب تأملي هادئ (تعليم ورقي وحسي ملموس للحد من تشتيت الهاتف الذكي) بناءً على المعطيات التالية:
 الدولة: ${country || "اليمن"}
 المادة: ${subject || "اللغة العربية"}
 الصف الدراسي: ${grade}
 عنوان الدرس المستهدف: ${actualLessonTitle}
 زمن الحصة: ${duration || "45"} دقيقة
-مرجعية المنهج الثابتة المتاحة:
+نوع أسئلة الاختبار المطلوب صياغته: ${qTypeDesc}
+عدد الأسئلة المطلوب صياغته في الاختبار: ${questionsNum} أسئلة
+إستراتيجية الأنشطة التعليمية المفضلة للتطبيق: ${strategyDesc}
+توجيهات إضافية: ${customNotes || "التركيز على القراءة والعمل اليدوي ونقاش السبورة التقليدية"}
+
+مرجعية المنهج الثابتة المتاحة المعتمدة لدرسنا:
 """
 ${curriculumContext}
 """
 
-المطلوب صياغة استجابة JSON دقيقة تحتوي على الحقول التالية فقط:
+المطلوب صياغة استجابة JSON دقيقة متكاملة تلبي هذا المخطط الهيكلي (Schema) بالكامل وبدون إيجاز مخل:
 {
   "title": "${actualLessonTitle}",
-  "metadata": { "grade": "${grade}", "subject": "${subject}", "duration": "${duration || "45"} دقائق" },
-  "objectives": ["الهدف الأول", "الهدف الثاني"],
-  "materials": ["الوسائل الحسية والتقليدية المفضل استخدامها في الصف"],
-  "introduction": ["خطوات التمهيد والتهيئة الحافزة للطلاب"],
+  "metadata": { 
+    "grade": "${grade}", 
+    "subject": "${subject}", 
+    "duration": "${duration || "45"} دقائق",
+    "curriculum": "دليل المنهج الموحد لـ ${country || "اليمن"}"
+  },
+  "objectives": ["الهدف السلوكي الأول بوضوح", "الهدف الثاني بوضوح", "الهدف الثالث بوضوح والوجداني"],
+  "materials": ["الوسائل الملموسة والتقليدية المستخدمة في الحصة لتقليل التعلق بالشاشات"],
+  "introduction": ["خطوة التمهيد الأولى", "خطوة التمهيد الثانية", "خطوة التمهيد الثالثة والتهيئة الحافزة"],
   "presentationSlides": [
-    { "slideTitle": "المحور الأول للدرس", "slideContent": ["شرح النقطة الأساسية"] }
+    { "slideTitle": "عنوان مرحلة الشرح الأولى", "slideContent": ["شرح وتفسير النقطة الأولى بالتفصيل", "تطبيق أو نقاش صفي"] }
   ],
-  "examUnit": {
-    "quizText": "نص اختبار مقترح للدرس يتنوع بين اختيار من متعدد، صح وخطأ، وأسئلة مقالية",
-    "answerKey": "نموذج الإجابة الكامل والنموذجي"
+  "assessment": ["السؤال التقويمي السريع الشفهي الأول", "السؤال التقويمي الثاني", "السؤال التقويمي الثالث"],
+  "homework": "واجب صفي ورقي يكتبه الطالب بالقلم والدفتر ويحثه على الانفصال عن الأجهزة والاتصال بواقعه الأسري",
+  "philosophicalTip": "نصيحة بيداغوجية وتأملية للمعلم بأسلوب الكاتب وضاح زليل تدعوه لبث الطمأنينة وإيقاظ عقول الطلاب وتجنب ضوضاء العصر الرقمي",
+  "examProposal": {
+    "title": "اختبار تقويمي لدرس ${actualLessonTitle}",
+    "questions": [
+      {
+        "type": "mcq", 
+        "questionText": "نص السؤال الأول اختيار من متعدد", 
+        "options": ["خيار أ", "خيار ب", "خيار ج", "خيار د"], 
+        "correctAnswer": "الإجابة الصحيحة بالكامل"
+      }
+    ]
   },
-  "activitiesUnit": [
-    "إستراتيجية تعلم نشط تفاعلية مثل (فكر-شارك-زميل) تناسب الصف الدراسي"
+  "interactiveActivities": [
+    {
+      "gameName": "اسم اللعبة أو النشاط الحركي الصفي المبتكر",
+      "strategy": "نوع الإستراتيجية (مثلاً: الكرسي الساخن)",
+      "description": "خطوات التطبيق العملي خطوة بخطوة بطريقة فنية ممتعة ومبسطة",
+      "environmentalAdaptation": "كيف يطبق المعلم هذا النشاط بإمكانيات ريفية أو صفية بسيطة بدون أي أجهزة رقمية"
+    }
   ],
-  "mindMapUnit": {
-    "mainIdea": "الفكرة المركزية للرسم على السبورة",
-    "branches": ["الأفكار الفرعية", "المفردات والتراكيب", "القواعد المقررة"]
-  },
-  "philosophicalTip": "نصيحة تربوية وجدانية عميقة وهادئة للمعلم لغرس قيم الانتماء والعمل الحقيقي"
-}`;
+  "mindMap": {
+    "mainTopic": "${actualLessonTitle}",
+    "branches": [
+      {
+        "heading": "الفرع السبوري الأول (مثال: المفاهيم الرئيسة)",
+        "items": ["عنصر أ", "عنصر ب"]
+      }
+    ]
+  }
+}
+
+ملاحظات هامة جداً:
+1. التزم باللغة المطلوبة في الاستجابة تماماً (${language === "en" ? "اللغة الإنجليزية" : "اللغة العربية الفصحى الفاخرة"}).
+2. يجب صياغة ورقة الاختبار بالكامل بعدد أسئلة ${questionsNum} أسئلة مطابقة للنوع المطلوب (${questionType}) وصياغة جميع أسئلة الاختبار مع نموذج إجابتها داخل حقل examProposal.
+3. قم بتوليد أنشطة التعلم النشط مطابقة للاستراتيجية المطلوبة (${activitiesStrategy}) داخل حقل interactiveActivities.
+4. صمم الخريطة الشجرية للسبورة لتعوض الطلاب عن العروض الرقمية الصاخبة داخل حقل mindMap.`;
 
     const responseSchema = {
       type: Type.OBJECT,
@@ -212,9 +339,10 @@ ${curriculumContext}
           properties: {
             grade: { type: Type.STRING },
             subject: { type: Type.STRING },
-            duration: { type: Type.STRING }
+            duration: { type: Type.STRING },
+            curriculum: { type: Type.STRING }
           },
-          required: ["grade", "subject", "duration"]
+          required: ["grade", "subject", "duration", "curriculum"]
         },
         objectives: {
           type: Type.ARRAY,
@@ -242,30 +370,69 @@ ${curriculumContext}
             required: ["slideTitle", "slideContent"]
           }
         },
-        examUnit: {
-          type: Type.OBJECT,
-          properties: {
-            quizText: { type: Type.STRING },
-            answerKey: { type: Type.STRING }
-          },
-          required: ["quizText", "answerKey"]
-        },
-        activitiesUnit: {
+        assessment: {
           type: Type.ARRAY,
           items: { type: Type.STRING }
         },
-        mindMapUnit: {
+        homework: { type: Type.STRING },
+        philosophicalTip: { type: Type.STRING },
+        examProposal: {
           type: Type.OBJECT,
           properties: {
-            mainIdea: { type: Type.STRING },
-            branches: {
+            title: { type: Type.STRING },
+            questions: {
               type: Type.ARRAY,
-              items: { type: Type.STRING }
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  type: { type: Type.STRING, enum: ["mcq", "true_false", "essay"] },
+                  questionText: { type: Type.STRING },
+                  options: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING }
+                  },
+                  correctAnswer: { type: Type.STRING }
+                },
+                required: ["type", "questionText", "correctAnswer"]
+              }
             }
           },
-          required: ["mainIdea", "branches"]
+          required: ["title", "questions"]
         },
-        philosophicalTip: { type: Type.STRING }
+        interactiveActivities: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              gameName: { type: Type.STRING },
+              strategy: { type: Type.STRING },
+              description: { type: Type.STRING },
+              environmentalAdaptation: { type: Type.STRING }
+            },
+            required: ["gameName", "strategy", "description", "environmentalAdaptation"]
+          }
+        },
+        mindMap: {
+          type: Type.OBJECT,
+          properties: {
+            mainTopic: { type: Type.STRING },
+            branches: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  heading: { type: Type.STRING },
+                  items: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING }
+                  }
+                },
+                required: ["heading", "items"]
+              }
+            }
+          },
+          required: ["mainTopic", "branches"]
+        }
       },
       required: [
         "title",
@@ -274,14 +441,16 @@ ${curriculumContext}
         "materials",
         "introduction",
         "presentationSlides",
-        "examUnit",
-        "activitiesUnit",
-        "mindMapUnit",
-        "philosophicalTip"
+        "assessment",
+        "homework",
+        "philosophicalTip",
+        "examProposal",
+        "interactiveActivities",
+        "mindMap"
       ]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: prompt,
       config: {
@@ -308,7 +477,7 @@ app.post("/api/gemini/home-communication", checkApiKey, async (req, res) => {
 سياق إضافي: ${contextNotes || "لا يوجد"}
 اللغة: العربية.`;
 
-    const response = await ai.models.generateContent({
+    const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: prompt,
     });
@@ -352,7 +521,7 @@ app.post("/api/gemini/parent-message", checkApiKey, async (req, res) => {
       required: ["letterSubject", "letterBody", "schoolHomeCooperationTip"]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: prompt,
       config: {
@@ -404,7 +573,7 @@ app.post("/api/gemini/curriculum-tips", checkApiKey, async (req, res) => {
       required: ["title", "keyPedagogicalAdvice", "unpluggedClassroomActivity", "motivationalQuote"]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: prompt,
       config: {
@@ -429,7 +598,7 @@ app.post("/api/gemini/voice-assistant", checkApiKey, async (req, res) => {
 قول المعلم: "${transcript || ""}"
 الرد باللغة العربية بأسلوب مهدئ وموجز ومحفز.`;
 
-    const response = await ai.models.generateContent({
+    const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: prompt,
     });
@@ -601,7 +770,7 @@ ${context || "لا يوجد سياق إضافي مرفوع."}
       required: ["answer", "citations", "mindfulConnection"]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: prompt,
       config: {
@@ -709,7 +878,7 @@ ${textToAnalyze.slice(0, 15000)}
       ]
     };
 
-    const response = await ai.models.generateContent({
+    const response = await generateContentWithRetry({
       model: "gemini-3.5-flash",
       contents: prompt,
       config: {
