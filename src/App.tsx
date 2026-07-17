@@ -21,6 +21,7 @@ import {
   CheckCircle,
   Headphones,
   Smartphone,
+  Database,
 } from "lucide-react";
 
 // Modular Imports
@@ -32,11 +33,12 @@ import CurriculumGuide from "./components/CurriculumGuide";
 import AboutWaddah from "./components/AboutWaddah";
 import VoiceAssistant from "./components/VoiceAssistant";
 import MobilePortal from "./components/MobilePortal";
+import AdminPanel from "./components/AdminPanel";
 
 export default function App() {
   const [lang, setLang] = useState<Language>("ar");
   const [activeTab, setActiveTab] = useState<
-    "planner" | "gradebook" | "summarizer" | "parent" | "curriculum" | "voice" | "mobile" | "about"
+    "planner" | "gradebook" | "summarizer" | "parent" | "curriculum" | "voice" | "mobile" | "about" | "admin"
   >("planner");
 
   const isAr = lang === "ar";
@@ -156,6 +158,18 @@ export default function App() {
           >
             <Smartphone className="w-4 h-4 flex-shrink-0" />
             <span>{isAr ? "تطبيق أندرويد وآيفون" : "Mobile App Portal"}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("admin")}
+            className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
+              activeTab === "admin"
+                ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
+                : "text-slate-300 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <Database className="w-4 h-4 flex-shrink-0" />
+            <span>{isAr ? "لوحة التحكم للمسؤول (الأدمن)" : "Admin Dashboard"}</span>
           </button>
 
           <p className="text-[10px] font-mono text-white/40 px-3 pt-4 pb-2 uppercase tracking-widest">
@@ -310,6 +324,7 @@ export default function App() {
               {activeTab === "curriculum" && <CurriculumGuide lang={lang} />}
               {activeTab === "voice" && <VoiceAssistant lang={lang} />}
               {activeTab === "mobile" && <MobilePortal lang={lang} />}
+              {activeTab === "admin" && <AdminPanel lang={lang} />}
               {activeTab === "about" && <AboutWaddah lang={lang} />}
             </motion.div>
           </AnimatePresence>

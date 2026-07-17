@@ -142,31 +142,36 @@ const handleGeminiError = (error: any, res: express.Response) => {
   });
 };
 
+import { PRESEEDED_BOOKS } from "./src/data/preseededBooks";
+
 // --- قاعدة بيانات مبسطة في الذاكرة لتخزين ومزامنة كتب المنهج الدراسي ---
 interface BookMeta {
   id: string;
   name: string;
+  country: string;
+  subject: string;
+  grade: string;
+  term: "الجزء الأول" | "الجزء الثاني" | "دليل المعلم";
   fileType: string;
   size: number;
   uploadedAt: string;
   text: string;
 }
 
-const booksDb: Map<string, BookMeta> = new Map([
-  [
-    "seed-coffee",
-    {
-      id: "seed-coffee",
-      name: "كتاب القراءة واللغة العربية - اليمن.pdf",
-      fileType: "pdf",
-      size: 2450000,
-      uploadedAt: new Date().toISOString(),
-      text: `منهج القراءة واللغة العربية - الدرس الرابع: زراعة البن في ريف اليمن وأثره الوجداني.
-تعتبر شجرة البن في اليمن رمزاً للأصالة والتأمل والصلة مع الأرض الواقعية المعطاءة. يصحو الفلاح اليمني مع بواكير الفجر، مستنشقاً الهواء النقي الملموس، بعيداً عن صخب المدن وضجيجها الرقمي الحديث. يسير بخطى وئيدة نحو الجبال المكسوة بالخضرة الداكنة، حاملاً أدواته اليدوية التقليدية التي تصون تربة الأجداد.
-يتعلم الطالب من هذا الدرس كيفية الحفاظ على الموارد الزراعية التقليدية، وقيمة الصبر والمثابرة التي يتطلبها نضوج حبة البن، وأهمية التقليل من الضوضاء التكنولوجية والعودة لجلسات القهوة الدافئة التي تجمع العائلة حول حديث إنساني حقيقي وصادق.`
-    }
-  ]
-]);
+const booksDb: Map<string, BookMeta> = new Map(
+  PRESEEDED_BOOKS.map(b => [b.id, {
+    id: b.id,
+    name: b.name,
+    country: b.country,
+    subject: b.subject,
+    grade: b.grade,
+    term: b.term,
+    fileType: b.fileType,
+    size: b.size,
+    uploadedAt: b.uploadedAt,
+    text: b.text
+  }])
+);
 
 // قاعدة بيانات مصغرة ومثبتة للمناهج اليمنية لضمان دقة الإجابة وبث الروح الوجدانية والتأملية لرسالة المعلم
 const yemeniCurriculumData: Record<string, string> = {
@@ -204,6 +209,7 @@ app.post("/api/gemini/lesson-plan", checkApiKey, async (req, res) => {
       country, 
       subject, 
       grade, 
+      term,
       lessonTitle, 
       topic,
       duration, 
@@ -239,14 +245,48 @@ app.post("/api/gemini/lesson-plan", checkApiKey, async (req, res) => {
     else if (normalizedSubject.includes("الرياضيات") || normalizedSubject.includes("Math")) normalizedSubject = "math";
 
     const curriculumKey = `${normalizedGrade}-${normalizedSubject}`;
-    let curriculumContext = "اعتماداً على المعايير التربوية العامة للمنهج المختار.";
+    
+    // البحث الديناميكي في قاعدة بيانات المناهج (booksDb) عن كتاب الطالب ودليل المعلم
+    let studentBookText = "";
+    let teacherGuideText = "";
 
-    if (country === "اليمن" || country === "Yemen") {
-      if (yemeniCurriculumData[curriculumKey]) {
-        curriculumContext = yemeniCurriculumData[curriculumKey];
-      } else if (yemeniCurriculumData[`${grade}-${subject}`]) {
-        curriculumContext = yemeniCurriculumData[`${grade}-${subject}`];
-      }
+    const selectedTerm = term || "الجزء الأول";
+
+    // 1. العثور على كتاب الطالب المطابق للدولة والمادة والصف والجزء الدراسي (الترم) المختار
+    const matchingStudentBook = Array.from(booksDb.values()).find(b => 
+      (b.country === country || b.country === "اليمن") &&
+      b.subject === subject &&
+      (b.grade === grade || b.grade.includes(normalizedGrade)) &&
+      b.term === selectedTerm
+    );
+
+    if (matchingStudentBook) {
+      studentBookText = matchingStudentBook.text;
+    }
+
+    // 2. العثور على دليل المعلم المطابق للدولة والمادة والصف
+    const matchingTeacherGuide = Array.from(booksDb.values()).find(b => 
+      (b.country === country || b.country === "اليمن") &&
+      b.subject === subject &&
+      (b.grade === grade || b.grade.includes(normalizedGrade)) &&
+      b.term === "دليل المعلم"
+    );
+
+    if (matchingTeacherGuide) {
+      teacherGuideText = matchingTeacherGuide.text;
+    }
+
+    // بناء سياق المنهج المستخلص
+    let curriculumContext = "";
+    if (studentBookText) {
+      curriculumContext += `\n[محتوى كتاب الطالب المعتمد]:\n${studentBookText}\n`;
+    }
+    if (teacherGuideText) {
+      curriculumContext += `\n[محتوى دليل المعلم المعتمد لتقديم الإرشادات البيداغوجية والتقييمية والوجدانية]:\n${teacherGuideText}\n`;
+    }
+
+    if (!curriculumContext) {
+      curriculumContext = "اعتماداً على المعايير التربوية العامة لوزارة التربية والتعليم.";
     }
 
     const qTypeDesc = questionType === "mcq" ? "اختيار من متعدد فقط" :
@@ -451,7 +491,7 @@ ${curriculumContext}
     };
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         systemInstruction,
@@ -478,7 +518,7 @@ app.post("/api/gemini/home-communication", checkApiKey, async (req, res) => {
 اللغة: العربية.`;
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
     });
 
@@ -522,7 +562,7 @@ app.post("/api/gemini/parent-message", checkApiKey, async (req, res) => {
     };
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         systemInstruction,
@@ -574,7 +614,7 @@ app.post("/api/gemini/curriculum-tips", checkApiKey, async (req, res) => {
     };
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         systemInstruction,
@@ -599,7 +639,7 @@ app.post("/api/gemini/voice-assistant", checkApiKey, async (req, res) => {
 الرد باللغة العربية بأسلوب مهدئ وموجز ومحفز.`;
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
     });
 
@@ -616,6 +656,10 @@ app.get("/api/curriculum/books", (req, res) => {
   const books = Array.from(booksDb.values()).map(b => ({
     id: b.id,
     name: b.name,
+    country: b.country,
+    subject: b.subject,
+    grade: b.grade,
+    term: b.term,
     fileType: b.fileType,
     size: b.size,
     uploadedAt: b.uploadedAt
@@ -684,14 +728,24 @@ app.post("/api/curriculum/upload", (req, res) => {
         fileContent = `[محتوى مستخلص من كتاب: ${filename}]\n\nهذا كتاب المنهج المدرسي المرفوع يدوياً وبطريقة آمنة. يحتوي على نصوص الدرس، القيم التربوية العميقة، والتوجيهات والأنشطة الواقعية لزراعة الفضول ومكافحة المشتتات الرقمية.`;
       }
 
+      const country = (req.query.country as string) || "اليمن";
+      const subject = (req.query.subject as string) || "اللغة العربية";
+      const grade = (req.query.grade as string) || "الصف السابع الأساسي";
+      const term = (req.query.term as "الجزء الأول" | "الجزء الثاني" | "دليل المعلم") || "الجزء الأول";
+      const customText = (req.query.customText as string) || "";
+
       const id = "book-" + Date.now();
       const book: BookMeta = {
         id,
         name: filename,
+        country,
+        subject,
+        grade,
+        term,
         fileType: filename.split(".").pop()?.toLowerCase() || "txt",
         size: buffer.length,
         uploadedAt: new Date().toISOString(),
-        text: fileContent || "محتوى فارغ."
+        text: fileContent || customText || "محتوى فارغ."
       };
       
       booksDb.set(id, book);
@@ -705,8 +759,8 @@ app.post("/api/curriculum/upload", (req, res) => {
 // 3. حذف كتاب منهجي
 app.delete("/api/curriculum/books/:id", (req, res) => {
   const { id } = req.params;
-  if (id === "seed-coffee") {
-    return res.status(400).json({ error: "لا يمكن حذف كتاب المنهج الافتراضي المدمج." });
+  if (id.startsWith("yemen-")) {
+    return res.status(400).json({ error: "لا يمكن حذف كتب ومراجع المنهج الافتراضي المدمجة بالنظام للحفاظ على سلامة محرك الـ RAG." });
   }
   if (booksDb.has(id)) {
     booksDb.delete(id);
@@ -771,7 +825,7 @@ ${context || "لا يوجد سياق إضافي مرفوع."}
     };
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         systemInstruction,
@@ -879,7 +933,7 @@ ${textToAnalyze.slice(0, 15000)}
     };
 
     const response = await generateContentWithRetry({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         systemInstruction,

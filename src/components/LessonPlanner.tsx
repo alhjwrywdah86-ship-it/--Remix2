@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { LessonPlan, Language } from "../types";
 import {
   Sparkles,
@@ -86,6 +86,45 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
   const [country, setCountry] = useState("اليمن");
   const [subject, setSubject] = useState("اللغة العربية");
   const [grade, setGrade] = useState("الصف الثامن الأساسي");
+  const [term, setTerm] = useState<"الجزء الأول" | "الجزء الثاني">("الجزء الأول");
+
+  // Books list for dynamic dropdowns
+  const [books, setBooks] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const res = await fetch("/api/curriculum/books");
+        if (res.ok) {
+          const data = await res.json();
+          setBooks(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch curriculum books:", err);
+      }
+    };
+    fetchBooks();
+  }, []);
+
+  // Compute available subjects dynamically
+  const availableSubjects = useMemo(() => {
+    const matchingBooks = books.filter(
+      b => b.country === country && b.grade === grade
+    );
+    if (matchingBooks.length > 0) {
+      // Return only subjects that exist in the books database for this grade
+      return Array.from(new Set(matchingBooks.map(b => b.subject)));
+    }
+    // Fallback to static defaults if no uploaded books exist
+    return isAr ? DEFAULT_SUBJECTS_AR : DEFAULT_SUBJECTS_EN;
+  }, [books, country, grade, isAr]);
+
+  // Adjust current subject if not in the available subjects list
+  useEffect(() => {
+    if (availableSubjects.length > 0 && !availableSubjects.includes(subject)) {
+      setSubject(availableSubjects[0]);
+    }
+  }, [availableSubjects, subject]);
   const [selectedLessonId, setSelectedLessonId] = useState("yemen-ar-8-coffee");
   const [topic, setTopic] = useState(isAr ? "زراعة البن في ريف اليمن وأثره الوجداني" : "Coffee Plantation in Yemen");
   const [curriculum, setCurriculum] = useState(isAr ? "المنهج اليمني الرسمي" : "Yemeni Standard Curriculum");
@@ -152,8 +191,10 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            country,
             subject,
             grade,
+            term,
             topic,
             curriculum,
             duration,
@@ -206,8 +247,10 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            country,
             subject,
             grade,
+            term,
             topic,
             curriculum,
             duration,
@@ -535,7 +578,7 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
                 onChange={(e) => setSubject(e.target.value)}
                 className="w-full bg-[#FAF8F5] border-2 border-charcoal p-2 focus:outline-none focus:ring-1 focus:ring-amber-gold font-sans cursor-pointer"
               >
-                {(isAr ? DEFAULT_SUBJECTS_AR : DEFAULT_SUBJECTS_EN).map((s) => (
+                {availableSubjects.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
@@ -556,6 +599,19 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
                     {g}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Term/Part dropdown */}
+            <div className="space-y-1">
+              <label className="block font-bold text-charcoal">{isAr ? "الجزء الدراسي المقرر:" : "Term / Textbook Part:"}</label>
+              <select
+                value={term}
+                onChange={(e) => setTerm(e.target.value as any)}
+                className="w-full bg-[#FAF8F5] border-2 border-charcoal p-2 focus:outline-none focus:ring-1 focus:ring-amber-gold font-sans cursor-pointer"
+              >
+                <option value="الجزء الأول">{isAr ? "الجزء الأول" : "Part 1 (Student Book)"}</option>
+                <option value="الجزء الثاني">{isAr ? "الجزء الثاني" : "Part 2 (Student Book)"}</option>
               </select>
             </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { SummaryResult, Language } from "../types";
 import { 
   FileText, 
@@ -173,6 +173,28 @@ export default function DocumentSummarizer({ lang }: DocumentSummarizerProps) {
   const [selectedCountry, setSelectedCountry] = useState<string>("اليمن");
   const [selectedGrade, setSelectedGrade] = useState<string>("الصف السابع الأساسي");
   const [selectedSubject, setSelectedSubject] = useState<string>("اللغة العربية");
+
+  // Compute available subjects dynamically
+  const availableSubjects = useMemo(() => {
+    const matchingBooks = books.filter(
+      b => b.country === selectedCountry && b.grade === selectedGrade
+    );
+    if (matchingBooks.length > 0) {
+      // Return only subjects that exist in the books database for this grade
+      return Array.from(new Set(matchingBooks.map(b => b.subject)));
+    }
+    // Fallback to static defaults if no uploaded books exist
+    return isAr 
+      ? ["اللغة العربية", "التربية الإسلامية والقرآن الكريم", "الاجتماعيات والتاريخ العربي", "العلوم والفيزياء الحيوية", "الرياضيات والمنطق الحسابي"]
+      : ["Arabic Language", "Islamic Studies & Ethics", "Social Studies & History", "General Sciences & Biology", "Mathematics & Analytical Logic"];
+  }, [books, selectedCountry, selectedGrade, isAr]);
+
+  // Adjust current subject if not in the available subjects list
+  useEffect(() => {
+    if (availableSubjects.length > 0 && !availableSubjects.includes(selectedSubject)) {
+      setSelectedSubject(availableSubjects[0]);
+    }
+  }, [availableSubjects, selectedSubject]);
 
   // State for document analysis (summarization)
   const [documentText, setDocumentText] = useState("");
@@ -600,11 +622,11 @@ export default function DocumentSummarizer({ lang }: DocumentSummarizerProps) {
                   onChange={(e) => setSelectedSubject(e.target.value)}
                   className="w-full bg-[#FAF8F5] border-2 border-charcoal p-2 rounded focus:outline-none focus:ring-1 focus:ring-amber-gold font-sans cursor-pointer"
                 >
-                  <option value="اللغة العربية">{isAr ? "اللغة العربية" : "Arabic Language"}</option>
-                  <option value="التربية الإسلامية والقرآن الكريم">{isAr ? "التربية الإسلامية والقرآن الكريم" : "Islamic Studies & Ethics"}</option>
-                  <option value="الاجتماعيات والتاريخ العربي">{isAr ? "الاجتماعيات والتاريخ العربي" : "Social Studies & History"}</option>
-                  <option value="العلوم والفيزياء الحيوية">{isAr ? "العلوم والفيزياء الحيوية" : "General Sciences & Biology"}</option>
-                  <option value="الرياضيات والمنطق الحسابي">{isAr ? "الرياضيات والمنطق الحسابي" : "Mathematics & Analytical Logic"}</option>
+                  {availableSubjects.map((sub) => (
+                    <option key={sub} value={sub}>
+                      {sub}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -679,7 +701,7 @@ export default function DocumentSummarizer({ lang }: DocumentSummarizerProps) {
                             </span>
                           </div>
                         </div>
-                        {book.id !== "seed-coffee" && (
+                        {!book.id.startsWith("yemen-") && (
                           <button
                             onClick={(e) => handleDeleteBook(book.id, e)}
                             className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-700 rounded transition-all cursor-pointer"
