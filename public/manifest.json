@@ -9,8 +9,14 @@
   "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "ar-YE",
-  "display_override": ["standalone", "window-controls-overlay"],
-  "categories": ["education", "productivity"],
+  "display_override": [
+    "standalone",
+    "window-controls-overlay"
+  ],
+  "categories": [
+    "education",
+    "productivity"
+  ],
   "iarc_rating_id": "",
   "related_applications": [],
   "prefer_related_applications": false,
