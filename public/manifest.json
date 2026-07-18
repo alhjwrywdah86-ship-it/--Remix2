@@ -7,7 +7,21 @@
   "background_color": "#FAF8F5",
   "theme_color": "#122846",
   "orientation": "portrait-primary",
+  "dir": "rtl",
+  "lang": "ar-YE",
+  "display_override": ["standalone", "window-controls-overlay"],
   "categories": ["education", "productivity"],
+  "iarc_rating_id": "",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "توليد خطة درس",
+      "short_name": "تحضير درس",
+      "url": "/",
+      "description": "الانتقال المباشر لأداة توليد خطط الدروس الذكية"
+    }
+  ],
   "icons": [
     {
       "src": "https://img.icons8.com/color/192/000000/google-scholar.png",
