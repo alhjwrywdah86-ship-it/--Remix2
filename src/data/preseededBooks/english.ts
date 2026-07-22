@@ -35,6 +35,29 @@ Reading Text: "Sami wakes up early in the morning at 5:00 AM. He performs his pr
 Grammar: Present Simple tense for habits and daily routines. Spelling rules for third-person singular (s/es).`
   },
   {
+    id: "yemen-7-english-part2",
+    name: "English Course - Grade 7 - Part 2.pdf",
+    country: "اليمن",
+    subject: "اللغة الإنجليزية",
+    grade: "الصف السابع الأساسي",
+    term: "الجزء الثاني",
+    fileType: "pdf",
+    size: 3200000,
+    uploadedAt: "2026-07-17T12:00:00Z",
+    text: `Crescent English Course for Yemen - Grade 7 (Part 2) - Student Book.
+Ministry of Education - Curricula and Guidance Sector.
+
+Unit 4: Sports and Hobbies.
+Lesson 1: Football and Running in Yemen.
+Reading Text: "Sports keep our minds and bodies strong. Playing football with classmates builds teamwork, leadership, and friendship."
+Grammar: Modal verbs (can, cannot) for ability and permission.
+
+Unit 5: Travel and Geography.
+Lesson 1: Traveling across Yemeni Cities.
+Reading Text: "Yemen has beautiful landscapes, from high mountains in Ibb to sunny beaches in Aden and Mukalla."
+Grammar: Prepositions of place and direction (in, on, at, to, under, behind).`
+  },
+  {
     id: "yemen-7-english-teacher",
     name: "Teacher's Guide - English - Grade 7.pdf",
     country: "اليمن",
@@ -90,6 +113,29 @@ Reading Text: "Socotra Island is one of the most unique natural reserves in the 
 Grammar: Comparative and Superlative adjectives (rarer, the rarest, more beautiful, most beautiful).`
   },
   {
+    id: "yemen-8-english-part2",
+    name: "English Course - Grade 8 - Part 2.pdf",
+    country: "اليمن",
+    subject: "اللغة الإنجليزية",
+    grade: "الصف الثامن الأساسي",
+    term: "الجزء الثاني",
+    fileType: "pdf",
+    size: 3300000,
+    uploadedAt: "2026-07-17T12:00:00Z",
+    text: `Crescent English Course for Yemen - Grade 8 (Part 2) - Student Book.
+Ministry of Education - Curricula and Guidance Sector.
+
+Unit 4: Inventions and Technology.
+Lesson 1: Printing and Books.
+Reading Text: "Paper and physical books changed human history forever. Reading printed books strengthens memory and deep thinking."
+Grammar: Present Perfect Tense with "has/have" + past participle.
+
+Unit 5: Environmental Conservation.
+Lesson 1: Saving Energy and Trees.
+Reading Text: "Planting trees in Yemeni terraces prevents soil erosion and cleans the air."
+Grammar: Passive voice in present simple.`
+  },
+  {
     id: "yemen-8-english-teacher",
     name: "Teacher's Guide - English - Grade 8.pdf",
     country: "اليمن",
@@ -142,6 +188,29 @@ Unit 3: Environment and Water Conservation.
 Lesson 1: Water Harvesting in Yemen.
 Reading Text: "Water is the most precious resource in Yemen. Since ancient times, Yemenis have built intricate water tanks, terraces, and dams (like the great Dam of Ma'rib) to harvest rainwater. We must continue this wise heritage by conserving water at home, avoiding plastic waste, and protecting our local wells."
 Grammar: Modal verbs for obligation, advice, and permission (must, should, can, have to, ought to).`
+  },
+  {
+    id: "yemen-9-english-part2",
+    name: "English Course - Grade 9 - Part 2.pdf",
+    country: "اليمن",
+    subject: "اللغة الإنجليزية",
+    grade: "الصف التاسع الأساسي",
+    term: "الجزء الثاني",
+    fileType: "pdf",
+    size: 3400000,
+    uploadedAt: "2026-07-17T12:00:00Z",
+    text: `Crescent English Course for Yemen - Grade 9 (Part 2) - Student Book.
+Ministry of Education - Curricula and Guidance Sector.
+
+Unit 4: Global Cooperation and Education.
+Lesson 1: The Power of Education.
+Reading Text: "Education empowers boys and girls to innovate, write, and rebuild their nation with knowledge and moral values."
+Grammar: Conditional sentences (First and Second Conditionals).
+
+Unit 5: Cultural Heritage and National Pride.
+Lesson 1: Preserving Ancient Architecture.
+Reading Text: "The clay skyscrapers of Shibam Hadramawt are known as the Manhattan of the Desert."
+Grammar: Reported speech and direct statements.`
   },
   {
     id: "yemen-9-english-teacher",

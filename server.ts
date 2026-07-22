@@ -252,41 +252,36 @@ app.post("/api/gemini/lesson-plan", checkApiKey, async (req, res) => {
 
     const selectedTerm = term || "الجزء الأول";
 
-    // 1. العثور على كتاب الطالب المطابق للدولة والمادة والصف والجزء الدراسي (الترم) المختار
-    const matchingStudentBook = Array.from(booksDb.values()).find(b => 
+    // 1. العثور على كافة أجزاء الكتب وأدلة المعلم المطابقة للدولة والمادة والصف
+    const matchingBooks = Array.from(booksDb.values()).filter(b => 
       (b.country === country || b.country === "اليمن") &&
-      b.subject === subject &&
-      (b.grade === grade || b.grade.includes(normalizedGrade)) &&
-      b.term === selectedTerm
+      (b.subject === subject || b.subject.includes(normalizedSubject) || normalizedSubject.includes(b.subject)) &&
+      (b.grade === grade || b.grade.includes(normalizedGrade) || normalizedGrade.includes(b.grade))
     );
 
-    if (matchingStudentBook) {
-      studentBookText = matchingStudentBook.text;
-    }
-
-    // 2. العثور على دليل المعلم المطابق للدولة والمادة والصف
-    const matchingTeacherGuide = Array.from(booksDb.values()).find(b => 
-      (b.country === country || b.country === "اليمن") &&
-      b.subject === subject &&
-      (b.grade === grade || b.grade.includes(normalizedGrade)) &&
-      b.term === "دليل المعلم"
-    );
-
-    if (matchingTeacherGuide) {
-      teacherGuideText = matchingTeacherGuide.text;
-    }
+    matchingBooks.forEach(b => {
+      if (b.term === "دليل المعلم") {
+        teacherGuideText += `\n--- [${b.name}] ---\n${b.text}\n`;
+      } else {
+        if (selectedTerm && b.term === selectedTerm) {
+          studentBookText = `\n--- [${b.name}] ---\n${b.text}\n` + studentBookText;
+        } else {
+          studentBookText += `\n--- [${b.name}] ---\n${b.text}\n`;
+        }
+      }
+    });
 
     // بناء سياق المنهج المستخلص
     let curriculumContext = "";
     if (studentBookText) {
-      curriculumContext += `\n[محتوى كتاب الطالب المعتمد]:\n${studentBookText}\n`;
+      curriculumContext += `\n[محتوى كتاب الطالب المعتمد رسمياً]:\n${studentBookText}\n`;
     }
     if (teacherGuideText) {
-      curriculumContext += `\n[محتوى دليل المعلم المعتمد لتقديم الإرشادات البيداغوجية والتقييمية والوجدانية]:\n${teacherGuideText}\n`;
+      curriculumContext += `\n[محتوى دليل المعلم المعتمد للإرشادات البيداغوجية والتقييمية]:\n${teacherGuideText}\n`;
     }
 
     if (!curriculumContext) {
-      curriculumContext = "اعتماداً على المعايير التربوية العامة لوزارة التربية والتعليم.";
+      curriculumContext = "ملاحظة: المنهج المطبوع المحدد غير متوفر نصياً بالكامل، استند للغايات التربوية العامة المعتمدة.";
     }
 
     const qTypeDesc = questionType === "mcq" ? "اختيار من متعدد فقط" :
@@ -778,35 +773,46 @@ app.post("/api/curriculum/chat", checkApiKey, async (req, res) => {
     let sourceName = "";
 
     if (bookId === "all") {
-      context = Array.from(booksDb.values()).map(b => `[كتاب: ${b.name}]\n${b.text}`).join("\n\n").slice(0, 15000);
-      sourceName = "جميع المناهج المرفوعة";
+      const queryKeywords = (query || "").toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+      const sortedBooks = Array.from(booksDb.values()).sort((a, b) => {
+        const scoreA = queryKeywords.reduce((acc: number, kw: string) => acc + (a.text.toLowerCase().includes(kw) ? 1 : 0), 0);
+        const scoreB = queryKeywords.reduce((acc: number, kw: string) => acc + (b.text.toLowerCase().includes(kw) ? 1 : 0), 0);
+        return scoreB - scoreA;
+      });
+      context = sortedBooks.map(b => `[اسم الكتاب: ${b.name} | الصف: ${b.grade} | المادة: ${b.subject} | الجزء/الترم: ${b.term}]\n${b.text}`).join("\n\n---\n\n").slice(0, 25000);
+      sourceName = "المكتبة المنهجية الرسمية المعتمدة (جميع المناهج)";
     } else if (bookId === "custom") {
       context = documentText || "";
       sourceName = documentName || "منهج مخصص";
     } else {
       const book = booksDb.get(bookId);
       if (book) {
-        context = book.text.slice(0, 15000);
+        context = `[اسم الكتاب: ${book.name} | الصف: ${book.grade} | المادة: ${book.subject} | الجزء/الترم: ${book.term}]\n` + book.text.slice(0, 25000);
         sourceName = book.name;
       }
     }
 
-    const systemInstruction = `أنت مستشار تربوي يمني قدير ومساعد دراسي ذكي يعتمد على أسلوب الكاتب والمفكر "وضاح الزليل" في تعزيز الواقع الحقيقي والملموس وتجنب ضوضاء العالم الرقمي.
-أجب عن استفسارات المعلم بناءً على نصوص الكتب المدرسية المرفوعة بدقة وأمانة علمية وبأسلوب فلسفي دافئ وجميل باللغة العربية.`;
+    const systemInstruction = `أنت مستشار تربوي وخبير مناهج تعليمية ورسول معرفة هادئ يعتمد على أسلوب الكاتب والمفكر "وضاح الزليل".
+التزم بالتعليمات الصارمة التالية للتكامل الهرمي للـ RAG:
+1. المرجعية الأولى والحصرية للإجابة هي نصوص الكتب المدرسية المرفوعة في السياق.
+2. إذا كانت المعلومة موجودة في السياق، يجب استخراجها واستخدامها دون غيرها، ثم كتابة إسناد وتوثيق دقيق للمصدر متضمناً (اسم الكتاب، الصف، الجزء/الفصل الدراسي، الوحدة، والدرس).
+3. يمنع منعاً باتاً الهلوسة أو اختراع معلومات غير موجودة بالمنهج عند الإجابة عن أسئلة المناهج المعتمدة.
+4. إذا لم توجد المعلومة في السياق المتاح، فيحق لك تقديم معرفة تربوية عامة شريطة تصدير الفقرة بوضوح تام بعبارة: "[ملاحظة: هذه المعلومة غير واردة نصاً في المنهج المعتمد المتاح، وتم استكمالها استناداً للمعرفة التربوية العامة]".`;
 
-    const prompt = `استخدم السياق التالي المستخرج من المناهج المدرسية للإجابة عن سؤال المعلم بدقة.
-السياق المتاح من (${sourceName}):
+    const prompt = `استخدم السياق التالي المستخرج من المناهج المدرسية المعتمدة للإجابة عن سؤال المعلم بأمانة علمية ودقة متناهية.
+
+السياق المتاح من المناهج الرسمية (${sourceName}):
 """
-${context || "لا يوجد سياق إضافي مرفوع."}
+${context || "لا يوجد سياق كتاب متاح."}
 """
 
 سؤال المعلم: "${query}"
 
-يجب أن تتضمن الإجابة العناصر التالية وتكون منسقة كـ JSON تماماً ومطابقة للمفاتيح التالية:
+المطلوب صياغة استجابة JSON دقيقة مطابقة للمفاتيح التالية:
 {
-  "answer": "الإجابة التفصيلية والتربوية الهادئة على السؤال، مع ربطها بالأمثلة والأنشطة الواقعية المناسبة.",
-  "citations": ["اقتباس مباشر من النص يدعم الإجابة"],
-  "mindfulConnection": "لمسة وجدانية عميقة بأسلوب وضاح الزليل تدعو المعلم للحد من التشتت الرقمي وتفعيل الحواس الخمس والعودة للطبيعة في هذا الموضوع بالتحديد."
+  "answer": "الإجابة التفصيلية والتربوية الهادئة. إذا كانت المعلومة استكمالاً خارج المنهج اذكر تنبيه [ملاحظة: هذه المعلومة غير واردة نصاً في المنهج المعتمد المتاح، وتم استكمالها استناداً للمعرفة التربوية العامة].",
+  "citations": ["التوثيق والمصدر المباشر بالتفصيل: (اسم الكتاب | الصف | الجزء | الوحدة | الدرس) والاقتباس الداعم إن وجد"],
+  "mindfulConnection": "لمسة وجدانية عميقة بأسلوب وضاح الزليل تدعو المعلم للحد من التشتت الرقمي وتفعيل الحواس الخمس والعودة للواقع الملموس والسبورة والورق."
 }
 
 تنبيه: أرسل الاستجابة بصيغة JSON خام تماماً دون أي علامات ماركداون إضافية أو نصوص خارج الـ JSON.`;
