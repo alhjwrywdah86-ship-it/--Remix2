@@ -52,11 +52,9 @@ const ai = new GoogleGenAI({
 // دالة مساعدة لتكرار محاولات الاتصال بـ Gemini مع التراجع الأسي في حال وجود ضغط مؤقت أو 503، ودعم التبديل التلقائي بين النماذج لضمان الخدمة المستمرة
 async function generateContentWithRetry(params: any, retries = 2, delay = 1000): Promise<any> {
   const modelsToTry = [
-    params.model,
+    params.model || "gemini-2.5-flash",
     "gemini-2.5-flash",
-    "gemini-1.5-flash",
-    "gemini-2.5-pro",
-    "gemini-1.5-pro"
+    "gemini-2.5-pro"
   ].filter((m, index, self) => m && self.indexOf(m) === index);
 
   let lastError: any = null;
@@ -767,28 +765,74 @@ app.delete("/api/curriculum/books/:id", (req, res) => {
 // 4. المحاورة الذكية والبحث في نصوص المناهج (RAG Chat)
 app.post("/api/curriculum/chat", checkApiKey, async (req, res) => {
   try {
-    const { bookId, query, documentText, documentName } = req.body;
+    const { bookId, query, documentText, documentName, country, subject, grade, term } = req.body;
 
     let context = "";
     let sourceName = "";
 
-    if (bookId === "all") {
-      const queryKeywords = (query || "").toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
-      const sortedBooks = Array.from(booksDb.values()).sort((a, b) => {
-        const scoreA = queryKeywords.reduce((acc: number, kw: string) => acc + (a.text.toLowerCase().includes(kw) ? 1 : 0), 0);
-        const scoreB = queryKeywords.reduce((acc: number, kw: string) => acc + (b.text.toLowerCase().includes(kw) ? 1 : 0), 0);
-        return scoreB - scoreA;
-      });
-      context = sortedBooks.map(b => `[اسم الكتاب: ${b.name} | الصف: ${b.grade} | المادة: ${b.subject} | الجزء/الترم: ${b.term}]\n${b.text}`).join("\n\n---\n\n").slice(0, 25000);
-      sourceName = "المكتبة المنهجية الرسمية المعتمدة (جميع المناهج)";
-    } else if (bookId === "custom") {
-      context = documentText || "";
-      sourceName = documentName || "منهج مخصص";
+    // 1. Direct Lookup if specific bookId passed
+    if (bookId && bookId !== "all" && bookId !== "custom" && booksDb.has(bookId)) {
+      const book = booksDb.get(bookId)!;
+      context = `[اسم الكتاب: ${book.name} | الصف: ${book.grade} | المادة: ${book.subject} | الجزء/الترم: ${book.term}]\n${book.text}`;
+      sourceName = book.name;
     } else {
-      const book = booksDb.get(bookId);
-      if (book) {
-        context = `[اسم الكتاب: ${book.name} | الصف: ${book.grade} | المادة: ${book.subject} | الجزء/الترم: ${book.term}]\n` + book.text.slice(0, 25000);
-        sourceName = book.name;
+      // 2. Hierarchical filter in booksDb based on country, subject, grade, term & query text
+      const reqCountry = country || "اليمن";
+      const reqSubject = subject || "";
+      const reqGrade = grade || "";
+      const reqTerm = term || "";
+      const q = (query || "").toLowerCase();
+
+      let matchedBooks = Array.from(booksDb.values()).filter(b => {
+        const matchCountry = !reqCountry || b.country === reqCountry || b.country === "اليمن";
+
+        // Normalize subject
+        const sub = reqSubject.toLowerCase();
+        const bSub = b.subject.toLowerCase();
+        const matchSubject = !reqSubject || bSub === sub || bSub.includes(sub) || sub.includes(bSub) ||
+          (sub.includes("عربي") && bSub.includes("عرب")) ||
+          (q.includes("لغتي العربية") && bSub.includes("عرب")) ||
+          (sub.includes("إسلام") && bSub.includes("إسلام")) ||
+          (sub.includes("علوم") && bSub.includes("علوم")) ||
+          (sub.includes("حاسوب") && bSub.includes("حاسوب")) ||
+          (sub.includes("وطنية") && bSub.includes("وطنية")) ||
+          (sub.includes("اجتماع") && bSub.includes("اجتماع")) ||
+          (sub.includes("رياضيات") && bSub.includes("رياضيات"));
+
+        // Normalize grade
+        const gr = reqGrade.toLowerCase();
+        const bGr = b.grade.toLowerCase();
+        const matchGrade = !reqGrade || bGr === gr || bGr.includes(gr) || gr.includes(bGr) ||
+          (gr.includes("تاسع") && bGr.includes("تاسع")) || (q.includes("التاسع") && bGr.includes("تاسع")) ||
+          (gr.includes("ثامن") && bGr.includes("ثامن")) || (q.includes("الثامن") && bGr.includes("ثامن")) ||
+          (gr.includes("سابع") && bGr.includes("سابع")) || (q.includes("السابع") && bGr.includes("سابع")) ||
+          (gr.includes("أول ثانوي") && bGr.includes("أول ثانوي"));
+
+        const matchTerm = !reqTerm || reqTerm === "الكل" || !b.term || b.term === reqTerm ||
+          (reqTerm.includes("الأول") && b.term.includes("الأول")) ||
+          (reqTerm.includes("الثاني") && b.term.includes("الثاني")) ||
+          (q.includes("الجزء الأول") && b.term.includes("الأول")) ||
+          (q.includes("الجزء الثاني") && b.term.includes("الثاني"));
+
+        return matchCountry && matchSubject && matchGrade && matchTerm;
+      });
+
+      if (matchedBooks.length > 0) {
+        context = matchedBooks.map(b => `[اسم الكتاب: ${b.name} | الصف: ${b.grade} | المادة: ${b.subject} | الجزء/الترم: ${b.term}]\n${b.text}`).join("\n\n---\n\n");
+        sourceName = matchedBooks.map(b => b.name).join(" + ");
+      } else if (documentText && documentText.trim().length > 0) {
+        context = documentText;
+        sourceName = documentName || "منهج مخصص";
+      } else {
+        // Fallback: search all books by keyword score
+        const queryKeywords = (query || "").toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+        const sortedBooks = Array.from(booksDb.values()).sort((a, b) => {
+          const scoreA = queryKeywords.reduce((acc: number, kw: string) => acc + (a.text.toLowerCase().includes(kw) ? 1 : 0), 0);
+          const scoreB = queryKeywords.reduce((acc: number, kw: string) => acc + (b.text.toLowerCase().includes(kw) ? 1 : 0), 0);
+          return scoreB - scoreA;
+        });
+        context = sortedBooks.map(b => `[اسم الكتاب: ${b.name} | الصف: ${b.grade} | المادة: ${b.subject} | الجزء/الترم: ${b.term}]\n${b.text}`).join("\n\n---\n\n").slice(0, 30000);
+        sourceName = "المكتبة المنهجية الرسمية المعتمدة (جميع المناهج)";
       }
     }
 

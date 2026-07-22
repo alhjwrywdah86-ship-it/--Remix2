@@ -445,6 +445,10 @@ export default function DocumentSummarizer({ lang }: DocumentSummarizerProps) {
           query: userMsgText,
           documentText: selectedBookForChat === "custom" ? documentText : "",
           documentName: selectedBookForChat === "custom" ? documentName : "",
+          country: selectedCountry,
+          subject: selectedSubject,
+          grade: selectedGrade,
+          term: selectedTerm,
           language: lang
         })
       });
