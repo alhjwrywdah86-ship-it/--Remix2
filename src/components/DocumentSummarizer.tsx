@@ -171,8 +171,9 @@ export default function DocumentSummarizer({ lang }: DocumentSummarizerProps) {
 
   // Arab Curriculum Selector States
   const [selectedCountry, setSelectedCountry] = useState<string>("اليمن");
-  const [selectedGrade, setSelectedGrade] = useState<string>("الصف السابع الأساسي");
+  const [selectedGrade, setSelectedGrade] = useState<string>("الصف التاسع الأساسي");
   const [selectedSubject, setSelectedSubject] = useState<string>("اللغة العربية");
+  const [selectedTerm, setSelectedTerm] = useState<string>("الجزء الأول");
 
   // Compute available subjects dynamically
   const availableSubjects = useMemo(() => {
