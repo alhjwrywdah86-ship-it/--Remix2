@@ -58,32 +58,6 @@ Reading Text: "Yemen has beautiful landscapes, from high mountains in Ibb to sun
 Grammar: Prepositions of place and direction (in, on, at, to, under, behind).`
   },
   {
-    id: "yemen-7-english-teacher",
-    name: "Teacher's Guide - English - Grade 7.pdf",
-    country: "اليمن",
-    subject: "اللغة الإنجليزية",
-    grade: "الصف السابع الأساسي",
-    term: "دليل المعلم",
-    fileType: "pdf",
-    size: 4000000,
-    uploadedAt: "2026-07-17T12:00:00Z",
-    text: `Teacher's Guide for Crescent English Course - Grade 7 - Republic of Yemen.
-Ministry of Education - General Educational Guidance.
-
-Pedagogical Instructions and Teaching Methods:
-1. Active Communication in the Classroom:
-- English-Only Environment (Gradual): Try to use simple English instructions for classroom management (e.g., "Stand up", "Sit down", "Open your books to page 10", "Write in your notebooks").
-- Role-Playing Dialogue: Encourage students to work in pairs and perform the dialogues of Ali and John aloud in front of the class. This builds speaking confidence and correct pronunciation.
-
-2. Unplugged Learning & Minimal Distractions:
-- Rely strictly on the chalkboard/whiteboard to write key vocabulary and grammar rules.
-- Encourage students to keep a physical vocabulary notebook where they write down new words and draw simple illustrations by hand to enhance tactile and visual retention.
-
-3. Assessment and Homework:
-- Regular dictation (Spelling Tests) on paper to reinforce vocabulary retention.
-- Give constructive, encouraging written feedback in their notebooks to inspire their learning journey.`
-  },
-  {
     id: "yemen-8-english-part1",
     name: "English Course - Grade 8 - Part 1.pdf",
     country: "اليمن",
@@ -136,31 +110,6 @@ Reading Text: "Planting trees in Yemeni terraces prevents soil erosion and clean
 Grammar: Passive voice in present simple.`
   },
   {
-    id: "yemen-8-english-teacher",
-    name: "Teacher's Guide - English - Grade 8.pdf",
-    country: "اليمن",
-    subject: "اللغة الإنجليزية",
-    grade: "الصف الثامن الأساسي",
-    term: "دليل المعلم",
-    fileType: "pdf",
-    size: 4100000,
-    uploadedAt: "2026-07-17T12:00:00Z",
-    text: `Teacher's Guide for Crescent English Course - Grade 8 - Republic of Yemen.
-Ministry of Education - General Educational Guidance.
-
-Teaching Strategies and Lesson Delivery:
-1. Interactive Reading & Comprehension:
-- Jigsaw Reading Technique: Divide the text about Socotra or Bab Al-Yemen into sections, assign each section to a group, and let students explain their parts to each other.
-- Mindmapping Grammar: Draw logical branching charts on the blackboard to explain Past Simple tense vs. Present Simple tense structures visually.
-
-2. Safe and Inclusive Environment:
-- Maintain a highly supportive and warm classroom climate. Never criticize students for making pronunciation errors; instead, guide them gently using choral repetition.
-- Encourage students to write short paragraphs about their own hometowns, focusing on traditional food and weather.
-
-3. Formative Evaluation:
-- Grade students on oral reading fluency, notebook neatness, and participation in pair dialogues.`
-  },
-  {
     id: "yemen-9-english-part1",
     name: "English Course - Grade 9 - Part 1.pdf",
     country: "اليمن",
@@ -211,30 +160,5 @@ Unit 5: Cultural Heritage and National Pride.
 Lesson 1: Preserving Ancient Architecture.
 Reading Text: "The clay skyscrapers of Shibam Hadramawt are known as the Manhattan of the Desert."
 Grammar: Reported speech and direct statements.`
-  },
-  {
-    id: "yemen-9-english-teacher",
-    name: "Teacher's Guide - English - Grade 9.pdf",
-    country: "اليمن",
-    subject: "اللغة الإنجليزية",
-    grade: "الصف التاسع الأساسي",
-    term: "دليل المعلم",
-    fileType: "pdf",
-    size: 4200000,
-    uploadedAt: "2026-07-17T12:00:00Z",
-    text: `Teacher's Guide for Crescent English Course - Grade 9 - Republic of Yemen.
-Ministry of Education - General Educational Guidance.
-
-Advanced Pedagogical Guidelines for Grade 9:
-1. Analytical and Critical Thinking:
-- Guided Debate: Organize a simple debate on water conservation (e.g., "Traditional water harvesting vs. modern deep wells") using simple English arguments.
-- Group Presentations: Have students present a famous Yemeni historical figure or monument on cardboard sheets to build presentation skills.
-
-2. Overcoming Digital Distractions:
-- Ensure the focus is entirely on physical writing, active dialogue, and listening to live human speech rather than digital recordings.
-- Practice mock national exam questions regularly, teaching students how to read reading comprehension texts carefully and structure their answers clearly.
-
-3. Comprehensive Evaluation:
-- Evaluate students' written essays (around 50-80 words), vocabulary dictation, and oral speaking skills during group activities.`
   }
 ];
