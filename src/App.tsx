@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Language } from "./types";
 import { motion, AnimatePresence } from "motion/react";
 import WaddahAvatarSymbol from "./components/WaddahAvatarSymbol";
@@ -34,14 +34,43 @@ import AboutWaddah from "./components/AboutWaddah";
 import VoiceAssistant from "./components/VoiceAssistant";
 import MobilePortal from "./components/MobilePortal";
 import AdminPanel from "./components/AdminPanel";
+import QuestionBank from "./components/QuestionBank";
+import WorksheetGenerator from "./components/WorksheetGenerator";
+import ActivityDesigner from "./components/ActivityDesigner";
+import TeacherProfileModal, { DEFAULT_TEACHER_PROFILE } from "./components/TeacherProfileModal";
+import { TeacherProfile } from "./types";
 
 export default function App() {
   const [lang, setLang] = useState<Language>("ar");
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "planner" | "gradebook" | "summarizer" | "parent" | "curriculum" | "voice" | "mobile" | "about" | "admin"
+    "dashboard" | "planner" | "gradebook" | "summarizer" | "parent" | "curriculum" | "voice" | "mobile" | "about" | "admin" | "qbank" | "worksheet" | "activity"
   >("dashboard");
 
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [teacherProfile, setTeacherProfile] = useState<TeacherProfile | undefined>(() => {
+    const saved = localStorage.getItem("ai_teacher_profile");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return undefined;
+      }
+    }
+    return undefined;
+  });
+
   const isAr = lang === "ar";
+
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [activeTab]);
 
   const handleLanguageToggle = () => {
     setLang((prev) => (prev === "ar" ? "en" : "ar"));
@@ -98,6 +127,42 @@ export default function App() {
           >
             <BookOpen className="w-4 h-4 flex-shrink-0" />
             <span>{isAr ? "تحضير الدروس وPPTX" : "Lesson Planner & PPTX"}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("qbank")}
+            className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
+              activeTab === "qbank"
+                ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
+                : "text-slate-300 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <Database className="w-4 h-4 flex-shrink-0" />
+            <span>{isAr ? "بنك الأسئلة الذكي" : "Question Bank"}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("worksheet")}
+            className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
+              activeTab === "worksheet"
+                ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
+                : "text-slate-300 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <FileText className="w-4 h-4 flex-shrink-0" />
+            <span>{isAr ? "مولد أوراق العمل" : "Worksheet Generator"}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("activity")}
+            className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
+              activeTab === "activity"
+                ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
+                : "text-slate-300 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <Users className="w-4 h-4 flex-shrink-0" />
+            <span>{isAr ? "مصمم النشاط الصفي" : "Activity Designer"}</span>
           </button>
 
           <button
@@ -265,7 +330,21 @@ export default function App() {
           </div>
 
           {/* Action Row & Language Switcher */}
-          <div className="flex items-center gap-3 self-start md:self-center">
+          <div className="flex items-center gap-3 self-start md:self-center flex-wrap">
+            <button
+              onClick={() => setShowProfileModal(true)}
+              className="px-3 py-1.5 bg-[#1A365D] text-white hover:bg-[#122846] border border-[#C5A021] rounded-lg flex items-center gap-1.5 font-mono text-xs cursor-pointer shadow-sm transition-all"
+            >
+              <Award className="w-3.5 h-3.5 text-[#C5A021]" />
+              <span>
+                {teacherProfile?.name
+                  ? `${isAr ? "ملف:" : "Profile:"} ${teacherProfile.name}`
+                  : isAr
+                  ? "ملف المعلم الذكي"
+                  : "AI Teacher Profile"}
+              </span>
+            </button>
+
             <button
               onClick={handleLanguageToggle}
               className="paper-btn px-3 py-1.5 flex items-center gap-1.5 font-mono text-xs cursor-pointer shadow-sm"
@@ -332,7 +411,10 @@ export default function App() {
         </section>
 
         {/* Main Component Render Tab Slot */}
-        <main className="flex-1 px-6 py-6 md:px-8">
+        <main
+          ref={contentRef}
+          className="flex-1 px-6 py-6 md:px-8 scroll-mt-6"
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab + "_" + lang}
@@ -438,7 +520,77 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* 3. Summarizer Card */}
+                    {/* 3. Question Bank Card */}
+                    <div
+                      onClick={() => setActiveTab("qbank")}
+                      className="group bg-white p-6 rounded-2xl border border-slate-200 hover:border-[#C5A021]/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4"
+                      id="card-qbank"
+                    >
+                      <div className="space-y-3">
+                        <div className="w-10 h-10 bg-[#C5A021]/10 rounded-xl flex items-center justify-center group-hover:bg-[#C5A021]/20 transition-colors">
+                          <Database className="w-5 h-5 text-[#C5A021]" />
+                        </div>
+                        <h4 className="text-base font-serif font-bold text-[#1A365D] group-hover:text-[#C5A021] transition-colors">
+                          {isAr ? "بنك الأسئلة الذكي" : "Smart Question Bank"}
+                        </h4>
+                        <p className="text-xs text-slate-500 leading-relaxed font-serif">
+                          {isAr
+                            ? "تخزين وتنظيم وتدوير أسئلة الاختبارات والوحدات مع إمكانية التصفية بالصف والمادة وإعادة الاستخدام."
+                            : "Store, organize, and query exam questions filtered by subject and grade offline."}
+                        </p>
+                      </div>
+                      <div className="pt-2 text-xs font-mono font-bold text-[#C5A021] flex items-center gap-1">
+                        <span>{isAr ? "دخول الأداة ←" : "Enter Tool ←"}</span>
+                      </div>
+                    </div>
+
+                    {/* 4. Worksheet Generator Card */}
+                    <div
+                      onClick={() => setActiveTab("worksheet")}
+                      className="group bg-white p-6 rounded-2xl border border-slate-200 hover:border-[#C5A021]/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4"
+                      id="card-worksheet"
+                    >
+                      <div className="space-y-3">
+                        <div className="w-10 h-10 bg-[#C5A021]/10 rounded-xl flex items-center justify-center group-hover:bg-[#C5A021]/20 transition-colors">
+                          <FileText className="w-5 h-5 text-[#C5A021]" />
+                        </div>
+                        <h4 className="text-base font-serif font-bold text-[#1A365D] group-hover:text-[#C5A021] transition-colors">
+                          {isAr ? "مولد أوراق العمل" : "Worksheet Generator"}
+                        </h4>
+                        <p className="text-xs text-slate-500 leading-relaxed font-serif">
+                          {isAr
+                            ? "إنشاء أوراق عمل تحتوي على موجز، أمثلة شارحة، وتدريبات ومساحات إجابة جاهزة للطباعة والـ Word."
+                            : "Create printable educational worksheets with summary, worked examples, and student exercise spaces."}
+                        </p>
+                      </div>
+                      <div className="pt-2 text-xs font-mono font-bold text-[#C5A021] flex items-center gap-1">
+                        <span>{isAr ? "دخول الأداة ←" : "Enter Tool ←"}</span>
+                      </div>
+                    </div>
+
+                    {/* 5. Activity Designer Card */}
+                    <div
+                      onClick={() => setActiveTab("activity")}
+                      className="group bg-white p-6 rounded-2xl border border-slate-200 hover:border-[#C5A021]/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4"
+                      id="card-activity"
+                    >
+                      <div className="space-y-3">
+                        <div className="w-10 h-10 bg-[#C5A021]/10 rounded-xl flex items-center justify-center group-hover:bg-[#C5A021]/20 transition-colors">
+                          <Users className="w-5 h-5 text-[#C5A021]" />
+                        </div>
+                        <h4 className="text-base font-serif font-bold text-[#1A365D] group-hover:text-[#C5A021] transition-colors">
+                          {isAr ? "مصمم النشاط الصفي" : "Classroom Activity Designer"}
+                        </h4>
+                        <p className="text-xs text-slate-500 leading-relaxed font-serif">
+                          {isAr
+                            ? "تصميم أنشطة افتتاحية وجماعية وتحديد دور المعلم والطالب والأدوات الملموسة لمنع تشتت الشاشات."
+                            : "Design interactive opening & group activities defining clear teacher/student roles and tangible tools."}
+                        </p>
+                      </div>
+                      <div className="pt-2 text-xs font-mono font-bold text-[#C5A021] flex items-center gap-1">
+                        <span>{isAr ? "دخول الأداة ←" : "Enter Tool ←"}</span>
+                      </div>
+                    </div>
                     <div
                       onClick={() => setActiveTab("summarizer")}
                       className="group bg-white p-6 rounded-2xl border border-slate-200 hover:border-[#C5A021]/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4"
@@ -608,7 +760,16 @@ export default function App() {
                   </div>
                 </div>
               )}
-              {activeTab === "planner" && <LessonPlanner lang={lang} />}
+              {activeTab === "planner" && (
+                <LessonPlanner lang={lang} teacherProfile={teacherProfile} />
+              )}
+              {activeTab === "qbank" && <QuestionBank isAr={isAr} />}
+              {activeTab === "worksheet" && (
+                <WorksheetGenerator isAr={isAr} teacherProfile={teacherProfile} />
+              )}
+              {activeTab === "activity" && (
+                <ActivityDesigner isAr={isAr} teacherProfile={teacherProfile} />
+              )}
               {activeTab === "gradebook" && <Gradebook lang={lang} />}
               {activeTab === "summarizer" && <DocumentSummarizer lang={lang} />}
               {activeTab === "parent" && <ParentMessageTab lang={lang} />}
@@ -619,6 +780,20 @@ export default function App() {
               {activeTab === "about" && <AboutWaddah lang={lang} />}
             </motion.div>
           </AnimatePresence>
+
+          {/* Teacher Profile Modal */}
+          {showProfileModal && (
+            <TeacherProfileModal
+              isOpen={showProfileModal}
+              isAr={isAr}
+              profile={teacherProfile || DEFAULT_TEACHER_PROFILE}
+              onClose={() => setShowProfileModal(false)}
+              onSaveProfile={(profile) => {
+                setTeacherProfile(profile);
+                setShowProfileModal(false);
+              }}
+            />
+          )}
         </main>
 
         {/* Premium Professional Publishing Footer */}

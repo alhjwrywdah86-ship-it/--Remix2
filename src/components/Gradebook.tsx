@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Student, Language } from "../types";
-import { Plus, Trash2, Download, RefreshCw, FileSpreadsheet, UserPlus, Save } from "lucide-react";
+import { Student, Language, StudentPerformanceAnalysis } from "../types";
+import { fetchWithRetry } from "../utils/fetchWithRetry";
+import { Plus, Trash2, Download, RefreshCw, FileSpreadsheet, UserPlus, Save, Sparkles, Brain, CheckCircle2, AlertTriangle, Lightbulb } from "lucide-react";
 import * as XLSX from "xlsx";
 
 interface GradebookProps {
@@ -44,11 +45,41 @@ export default function Gradebook({ lang }: GradebookProps) {
   const [newNotes, setNewNotes] = useState("");
 
   const [activeTab, setActiveTab] = useState<"list" | "add">("list");
+  const [analyzing, setAnalyzing] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<StudentPerformanceAnalysis | null>(null);
 
   // Filter grade/class
   const [selectedGradeFilter, setSelectedGradeFilter] = useState("all");
 
   const gradesList = ["all", ...Array.from(new Set(students.map((s) => s.grade)))];
+
+  const handleAnalyzeGradebook = async () => {
+    setAnalyzing(true);
+    setAiAnalysis(null);
+
+    try {
+      const activeStudents = students.filter(
+        (s) => selectedGradeFilter === "all" || s.grade === selectedGradeFilter
+      );
+
+      const data = await fetchWithRetry<StudentPerformanceAnalysis>("/api/gemini/analyze-gradebook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          students: activeStudents,
+          gradeFilter: selectedGradeFilter,
+          language: isAr ? "ar" : "en",
+        }),
+      });
+
+      setAiAnalysis(data);
+    } catch (err) {
+      console.error("AI Gradebook Analysis failed:", err);
+      alert(isAr ? "تعذر تحليل السجل بالذكاء الاصطناعي حالياً." : "Failed to analyze gradebook.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   // Helper to compute final grade
   const computeFinal = (hw: number, part: number, exam: number) => {
@@ -212,7 +243,25 @@ export default function Gradebook({ lang }: GradebookProps) {
               </select>
             </div>
 
-            <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+            <div className="flex items-center gap-2 w-full md:w-auto justify-end flex-wrap">
+              <button
+                onClick={handleAnalyzeGradebook}
+                disabled={analyzing}
+                className="px-3 py-1.5 text-xs font-bold text-white bg-[#1A365D] hover:bg-[#122846] border border-[#C5A021] rounded flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+              >
+                {analyzing ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>{isAr ? "جاري التحليل..." : "Analyzing..."}</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5 text-[#C5A021]" />
+                    <span>{isAr ? "تحليل السجل بالذكاء الاصطناعي" : "AI Gradebook Analysis"}</span>
+                  </>
+                )}
+              </button>
+
               <button onClick={handleResetToDefault} className="paper-btn px-3 py-1.5 text-xs flex items-center gap-1.5">
                 <RefreshCw className="w-3.5 h-3.5" />
                 {isAr ? "استعادة النموذجي" : "Reset Sample"}
@@ -227,6 +276,66 @@ export default function Gradebook({ lang }: GradebookProps) {
               </button>
             </div>
           </div>
+
+          {/* AI Analysis Card */}
+          {aiAnalysis && (
+            <div className="bg-white rounded-xl border-2 border-[#C5A021] p-5 shadow-md space-y-4 text-xs animate-fade-in">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div className="flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-[#C5A021]" />
+                  <h4 className="font-bold text-sm text-[#1A365D] font-serif">
+                    {isAr ? "تقرير التحليل التربوي الذكي لدرجات الطلاب" : "AI Gradebook Educational Report"}
+                  </h4>
+                </div>
+                <span className="bg-[#1A365D] text-[#C5A021] text-[10px] px-2 py-0.5 rounded font-bold font-mono">
+                  {isAr ? `متوسط الصف: ${aiAnalysis.averageScore}%` : `Avg: ${aiAnalysis.averageScore}%`}
+                </span>
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 leading-relaxed">
+                <strong>📌 {isAr ? "ملخص الأداء العام:" : "Performance Summary:"} </strong>
+                {aiAnalysis.summary}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg space-y-1">
+                  <h5 className="font-bold text-emerald-900 flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>{isAr ? "الطلاب المتفوقون ونقاط القوة:" : "Top Performers & Strengths:"}</span>
+                  </h5>
+                  <ul className="list-disc list-inside text-emerald-800 space-y-0.5">
+                    {aiAnalysis.strengths.map((str, idx) => (
+                      <li key={idx}>{str}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg space-y-1">
+                  <h5 className="font-bold text-rose-900 flex items-center gap-1">
+                    <AlertTriangle className="w-4 h-4 text-rose-600" />
+                    <span>{isAr ? "الطلاب الذين يحتاجون خطة دعم (الضعف):" : "Students Needing Support:"}</span>
+                  </h5>
+                  <ul className="list-disc list-inside text-rose-800 space-y-0.5">
+                    {aiAnalysis.weaknesses.map((wk, idx) => (
+                      <li key={idx}>{wk}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#1A365D] text-white rounded-lg space-y-1 border-s-4 border-[#C5A021]">
+                <h5 className="font-bold text-[#C5A021] flex items-center gap-1">
+                  <Lightbulb className="w-4 h-4" />
+                  <span>💡 {isAr ? "توصيات ومقترحات التحسين للمعلم:" : "AI Recommendations:"}</span>
+                </h5>
+                <ul className="list-disc list-inside text-slate-200 space-y-1">
+                  {aiAnalysis.recommendations.map((rec, idx) => (
+                    <li key={idx}>{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
 
           {/* Table Container */}
           <div className="paper-card p-0 bg-white overflow-x-auto">

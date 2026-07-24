@@ -350,10 +350,12 @@ export default function AdminPanel({ lang }: AdminPanelProps) {
                   onChange={(e) => setUploadGrade(e.target.value)}
                   className="w-full bg-[#FAF8F5] border-2 border-charcoal p-1.5 focus:outline-none focus:ring-1 focus:ring-amber-gold"
                 >
-                  <option value="الصف السابع الأساسي">{isAr ? "الصف السابع" : "Grade 7"}</option>
-                  <option value="الصف الثامن الأساسي">{isAr ? "الصف الثامن" : "Grade 8"}</option>
-                  <option value="الصف التاسع الأساسي">{isAr ? "الصف التاسع" : "Grade 9"}</option>
-                  <option value="الصف الأول الثانوي">{isAr ? "الصف العاشر" : "Grade 10"}</option>
+                  <option value="الصف السابع الأساسي">{isAr ? "الصف السابع الأساسي" : "Grade 7"}</option>
+                  <option value="الصف الثامن الأساسي">{isAr ? "الصف الثامن الأساسي" : "Grade 8"}</option>
+                  <option value="الصف التاسع الأساسي">{isAr ? "الصف التاسع الأساسي" : "Grade 9"}</option>
+                  <option value="الصف الأول الثانوي">{isAr ? "الصف الأول الثانوي" : "Grade 10 / 1st Secondary"}</option>
+                  <option value="الصف الثاني الثانوي">{isAr ? "الصف الثاني الثانوي" : "Grade 11 / 2nd Secondary"}</option>
+                  <option value="الصف الثالث الثانوي">{isAr ? "الصف الثالث الثانوي" : "Grade 12 / 3rd Secondary"}</option>
                 </select>
               </div>
 

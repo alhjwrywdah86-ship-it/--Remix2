@@ -614,6 +614,8 @@ export default function DocumentSummarizer({ lang }: DocumentSummarizerProps) {
                   <option value="الصف الثامن الأساسي">{isAr ? "الصف الثامن الأساسي" : "8th Grade Primary"}</option>
                   <option value="الصف التاسع الأساسي">{isAr ? "الصف التاسع الأساسي" : "9th Grade Primary"}</option>
                   <option value="الصف الأول الثانوي">{isAr ? "الصف الأول الثانوي" : "10th Grade Secondary"}</option>
+                  <option value="الصف الثاني الثانوي">{isAr ? "الصف الثاني الثانوي" : "11th Grade Secondary"}</option>
+                  <option value="الصف الثالث الثانوي">{isAr ? "الصف الثالث الثانوي" : "12th Grade Secondary"}</option>
                 </select>
               </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { LessonPlan, Language } from "../types";
+import { LessonPlan, Language, TeacherProfile } from "../types";
 import {
   Sparkles,
   FileText,
@@ -27,21 +27,28 @@ import { fetchWithRetry } from "../utils/fetchWithRetry";
 
 interface LessonPlannerProps {
   lang: Language;
+  teacherProfile?: TeacherProfile;
 }
 
 const DEFAULT_SUBJECTS_AR = [
   "اللغة العربية",
+  "الأدب والبلاغة والنقد",
   "التربية الإسلامية والقرآن الكريم",
   "الاجتماعيات والتاريخ العربي",
   "العلوم والفيزياء الحيوية",
+  "الفيزياء والكيمياء",
+  "الأحياء والجيولوجيا",
   "الرياضيات والمنطق الحسابي",
 ];
 
 const DEFAULT_SUBJECTS_EN = [
   "Arabic Language",
+  "Arabic Literature & Rhetoric",
   "Islamic Studies & Ethics",
   "Social Studies & History",
   "General Sciences & Biology",
+  "Physics & Chemistry",
+  "Biology & Geology",
   "Mathematics & Analytical Logic",
 ];
 
@@ -79,7 +86,7 @@ function getFallbackTopicText(country: string, grade: string, subject: string, i
   return isAr ? `قراءة نقدية في أدب وتراث ${country}` : `Critical Readings in the Heritage of ${country}`;
 }
 
-export default function LessonPlanner({ lang }: LessonPlannerProps) {
+export default function LessonPlanner({ lang, teacherProfile }: LessonPlannerProps) {
   const isAr = lang === "ar";
 
   // Form States
@@ -130,6 +137,11 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
   const [curriculum, setCurriculum] = useState(isAr ? "المنهج اليمني الرسمي" : "Yemeni Standard Curriculum");
   const [duration, setDuration] = useState("45");
   const [customNotes, setCustomNotes] = useState("");
+
+  // Enhanced Lesson Planner Options
+  const [lessonType, setLessonType] = useState("شرح درس جديد");
+  const [teachingStrategy, setTeachingStrategy] = useState("التعلم التعاوني وعمل المجموعات");
+  const [studentLevel, setStudentLevel] = useState("متوسط");
 
   // Quiz, Activity & Mindmap customization options
   const [questionType, setQuestionType] = useState("mixed");
@@ -200,6 +212,10 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
             duration,
             language: lang,
             customNotes,
+            lessonType,
+            teachingStrategy,
+            studentLevel,
+            teacherProfile,
             preloadedLessonId: selectedLessonId,
             questionType,
             questionsCount,
@@ -256,6 +272,10 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
             duration,
             language: lang,
             customNotes,
+            lessonType,
+            teachingStrategy,
+            studentLevel,
+            teacherProfile,
             preloadedLessonId: selectedLessonId,
             questionType,
             questionsCount,
@@ -662,6 +682,52 @@ export default function LessonPlanner({ lang }: LessonPlannerProps) {
                 onChange={(e) => setCurriculum(e.target.value)}
                 className="w-full bg-[#FAF8F5] border-2 border-charcoal p-2 focus:outline-none text-xs font-sans"
               />
+            </div>
+
+            {/* Lesson Type */}
+            <div className="space-y-1">
+              <label className="block font-bold text-charcoal">{isAr ? "نوع الحصة:" : "Lesson Type:"}</label>
+              <select
+                value={lessonType}
+                onChange={(e) => setLessonType(e.target.value)}
+                className="w-full bg-[#FAF8F5] border-2 border-charcoal p-2 focus:outline-none focus:ring-1 focus:ring-amber-gold font-sans text-xs cursor-pointer"
+              >
+                <option value="شرح درس جديد">{isAr ? "شرح درس جديد" : "New Lesson"}</option>
+                <option value="مراجعة وتثبيت مفاهيم">{isAr ? "مراجعة وتثبيت مفاهيم" : "Review & Reinforcement"}</option>
+                <option value="علاج ضعف ومعالجة تعثر">{isAr ? "علاج ضعف ومعالجة تعثر" : "Remedial & Support"}</option>
+                <option value="اختبار قبلي / تقويمي">{isAr ? "اختبار قبلي / تقويمي" : "Diagnostic Quiz"}</option>
+                <option value="نشاط إثرائي وتحدي">{isAr ? "نشاط إثرائي وتحدي" : "Enrichment Activity"}</option>
+              </select>
+            </div>
+
+            {/* Teaching Strategy */}
+            <div className="space-y-1">
+              <label className="block font-bold text-charcoal">{isAr ? "استراتيجية التدريس:" : "Teaching Strategy:"}</label>
+              <select
+                value={teachingStrategy}
+                onChange={(e) => setTeachingStrategy(e.target.value)}
+                className="w-full bg-[#FAF8F5] border-2 border-charcoal p-2 focus:outline-none focus:ring-1 focus:ring-amber-gold font-sans text-xs cursor-pointer"
+              >
+                <option value="التعلم التعاوني وعمل المجموعات">{isAr ? "التعلم التعاوني وعمل المجموعات" : "Cooperative Learning"}</option>
+                <option value="العصف الذهني والخرائط الذهنية">{isAr ? "العصف الذهني والخرائط الذهنية" : "Brainstorming & Mind Maps"}</option>
+                <option value="فكر - زاوج - شارك">{isAr ? "فكر - زاوج - شارك (Think-Pair-Share)" : "Think-Pair-Share"}</option>
+                <option value="التعلم باللعب والمحاكاة">{isAr ? "التعلم باللعب والمحاكاة" : "Game-Based Learning"}</option>
+                <option value="الاستكشاف والتعلم النشط">{isAr ? "الاستكشاف والتعلم النشط" : "Inquiry & Active Learning"}</option>
+              </select>
+            </div>
+
+            {/* Student Level */}
+            <div className="space-y-1">
+              <label className="block font-bold text-charcoal">{isAr ? "مستوى الطلاب المستهدف:" : "Target Student Level:"}</label>
+              <select
+                value={studentLevel}
+                onChange={(e) => setStudentLevel(e.target.value)}
+                className="w-full bg-[#FAF8F5] border-2 border-charcoal p-2 focus:outline-none focus:ring-1 focus:ring-amber-gold font-sans text-xs cursor-pointer"
+              >
+                <option value="متوسط">{isAr ? "متوسط (الشريحة الكبرى)" : "Average"}</option>
+                <option value="ضعيف ومحتوى ميسر">{isAr ? "ضعيف ومحتوى ميسر" : "Basic / Remedial"}</option>
+                <option value="متقدم وتحديات تفكير">{isAr ? "متقدم وتحديات تفكير عالية" : "Advanced / High Ability"}</option>
+              </select>
             </div>
 
             {/* Duration */}
