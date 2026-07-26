@@ -240,6 +240,38 @@ export default function QuestionBank({
     printContent("طباعة أسئلة مختارة من بنك الأسئلة الذكي", html);
   };
 
+  const handlePublishAsOnlineQuiz = () => {
+    const itemsToPublish = bankItems.filter((i) => selectedQuestions.includes(i.id));
+    if (itemsToPublish.length === 0) {
+      alert(isAr ? "يرجى تحديد أسئلة أولاً لنشرها كاختبار إلكتروني للطلاب." : "Select questions first.");
+      return;
+    }
+
+    const quizQuestions = itemsToPublish.map((item) => item.question);
+    const quizTitle = `اختبار تقويمي من بنك الأسئلة (${itemsToPublish[0].topic || itemsToPublish[0].subject})`;
+
+    fetch("/api/quizzes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: quizTitle,
+        grade: itemsToPublish[0].grade,
+        subject: itemsToPublish[0].subject,
+        durationMinutes: Math.max(10, itemsToPublish.length * 5),
+        questions: quizQuestions,
+      }),
+    })
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success) {
+          setSuccessMessage(isAr ? "تم نشر الأسئلة المختارة كاختبار إلكتروني للطلاب بنجاح!" : "Published as Online Quiz!");
+          setSelectedQuestions([]);
+          setTimeout(() => setSuccessMessage(""), 4000);
+        }
+      })
+      .catch((err) => alert("فشل نشر الاختبار"));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -314,6 +346,13 @@ export default function QuestionBank({
 
           {selectedQuestions.length > 0 && (
             <div className="flex items-center gap-2">
+              <button
+                onClick={handlePublishAsOnlineQuiz}
+                className="px-3 py-2 rounded-lg text-xs font-bold text-[#1A365D] bg-[#C5A021] hover:bg-amber-400 flex items-center gap-1 cursor-pointer shadow-sm transition-all"
+              >
+                <FileCheck2 className="w-3.5 h-3.5" />
+                <span>{isAr ? `نشر باختبار للطلاب (${selectedQuestions.length})` : `Publish Quiz (${selectedQuestions.length})`}</span>
+              </button>
               <button
                 onClick={handleExportSelectedToWord}
                 className="px-3 py-2 rounded-lg text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 flex items-center gap-1 cursor-pointer"

@@ -13,15 +13,20 @@ import {
   AlertCircle
 } from "lucide-react";
 
+import { getCurriculumByCode } from "../data/regionalCurricula";
+
 interface WorksheetGeneratorProps {
   isAr: boolean;
   teacherProfile?: TeacherProfile;
+  activeCountryCode?: string;
 }
 
 export default function WorksheetGenerator({
   isAr,
   teacherProfile,
+  activeCountryCode = "YE",
 }: WorksheetGeneratorProps) {
+  const activeCurr = getCurriculumByCode(activeCountryCode);
   const [grade, setGrade] = useState("الصف الثامن الأساسي");
   const [subject, setSubject] = useState("اللغة العربية");
   const [lesson, setLesson] = useState("المفعول به وأنواعه");
@@ -48,6 +53,8 @@ export default function WorksheetGenerator({
         lesson,
         difficulty,
         teacherProfile,
+        country: activeCurr.countryNameAr,
+        curriculumGuidelines: activeCurr.aiPromptGuidelines,
         language: isAr ? "ar" : "en",
       };
 

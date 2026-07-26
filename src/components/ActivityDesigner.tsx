@@ -15,15 +15,20 @@ import {
   Wrench
 } from "lucide-react";
 
+import { getCurriculumByCode } from "../data/regionalCurricula";
+
 interface ActivityDesignerProps {
   isAr: boolean;
   teacherProfile?: TeacherProfile;
+  activeCountryCode?: string;
 }
 
 export default function ActivityDesigner({
   isAr,
   teacherProfile,
+  activeCountryCode = "YE",
 }: ActivityDesignerProps) {
+  const activeCurr = getCurriculumByCode(activeCountryCode);
   const [grade, setGrade] = useState("الصف التاسع الأساسي");
   const [subject, setSubject] = useState("اللغة العربية");
   const [lesson, setLesson] = useState("أنواع البدل وأحكامه النحوية");
@@ -52,6 +57,7 @@ export default function ActivityDesigner({
         objective,
         strategy,
         teacherProfile,
+        country: activeCurr.countryNameAr,
         language: isAr ? "ar" : "en",
       };
 

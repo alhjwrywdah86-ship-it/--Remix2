@@ -16,18 +16,23 @@ import {
   AlertCircle
 } from "lucide-react";
 
+import { getCurriculumByCode } from "../data/regionalCurricula";
+
 interface SmartQuizGeneratorProps {
   isAr: boolean;
   teacherProfile?: TeacherProfile;
   onSaveToQuestionBank?: (item: QuestionBankItem) => void;
+  activeCountryCode?: string;
 }
 
 export default function SmartQuizGenerator({
   isAr,
   teacherProfile,
   onSaveToQuestionBank,
+  activeCountryCode = "YE",
 }: SmartQuizGeneratorProps) {
-  const [country, setCountry] = useState("اليمن");
+  const activeCurr = getCurriculumByCode(activeCountryCode);
+  const [country, setCountry] = useState(activeCurr.countryNameAr);
   const [grade, setGrade] = useState("الصف التاسع الأساسي");
   const [subject, setSubject] = useState("اللغة العربية");
   const [unit, setUnit] = useState("الوحدة الأولى");

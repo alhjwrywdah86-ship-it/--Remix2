@@ -9,8 +9,8 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 );
 
-// Register Progressive Web App Service Worker for Android Installation support
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+// Register Progressive Web App Service Worker for Mobile & Offline support
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((reg) => {

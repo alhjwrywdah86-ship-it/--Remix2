@@ -24,10 +24,13 @@ import {
 import pptxgen from "pptxgenjs";
 import { PRELOADED_CURRICULUM } from "../data/curriculumData";
 import { fetchWithRetry } from "../utils/fetchWithRetry";
+import { saveOfflineResource, getOfflineResources } from "../utils/offlineStorage";
+import { getCurriculumByCode } from "../data/regionalCurricula";
 
 interface LessonPlannerProps {
   lang: Language;
   teacherProfile?: TeacherProfile;
+  activeCountryCode?: string;
 }
 
 const DEFAULT_SUBJECTS_AR = [
@@ -86,14 +89,22 @@ function getFallbackTopicText(country: string, grade: string, subject: string, i
   return isAr ? `قراءة نقدية في أدب وتراث ${country}` : `Critical Readings in the Heritage of ${country}`;
 }
 
-export default function LessonPlanner({ lang, teacherProfile }: LessonPlannerProps) {
+export default function LessonPlanner({ lang, teacherProfile, activeCountryCode = "YE" }: LessonPlannerProps) {
   const isAr = lang === "ar";
 
   // Form States
-  const [country, setCountry] = useState("اليمن");
+  const activeCurr = getCurriculumByCode(activeCountryCode);
+  const [country, setCountry] = useState(activeCurr.countryNameAr.includes("اليمن") ? "اليمن" : activeCurr.countryNameAr);
   const [subject, setSubject] = useState("اللغة العربية");
   const [grade, setGrade] = useState("الصف الثامن الأساسي");
   const [term, setTerm] = useState<"الجزء الأول" | "الجزء الثاني">("الجزء الأول");
+
+  useEffect(() => {
+    if (activeCountryCode) {
+      const c = getCurriculumByCode(activeCountryCode);
+      setCountry(c.countryNameAr.includes("اليمن") ? "اليمن" : c.countryNameAr);
+    }
+  }, [activeCountryCode]);
 
   // Books list for dynamic dropdowns
   const [books, setBooks] = useState<any[]>([]);
@@ -239,9 +250,33 @@ export default function LessonPlanner({ lang, teacherProfile }: LessonPlannerPro
       setPlan(data);
       setActiveSlideIndex(0);
       setActiveOutputTab("plan");
+
+      // Auto-save to offline storage
+      saveOfflineResource({
+        type: "lesson_plan",
+        title: data.title || topic,
+        subject: subject,
+        grade: grade,
+        content: data
+      });
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "An error occurred while generating the plan.");
+      // Fallback to offline cached plan if available
+      const cached = getOfflineResources().find(
+        (r) => r.type === "lesson_plan" && (r.title.includes(topic) || topic.includes(r.title) || r.subject === subject)
+      );
+      if (cached && cached.content) {
+        setPlan(cached.content);
+        setActiveSlideIndex(0);
+        setActiveOutputTab("plan");
+        setError(
+          isAr
+            ? "تعذر الاتصال بالخادم. تم تحميل التحضير المحفوظ محلياً لهذا المنهج (Offline Mode)."
+            : "Offline Mode: Loaded locally cached lesson plan."
+        );
+      } else {
+        setError(err.message || (isAr ? "حدث خطأ أثناء توليد التحضير." : "An error occurred while generating the plan."));
+      }
     } finally {
       setLoading(false);
       setRetryStatus(null);
@@ -299,10 +334,29 @@ export default function LessonPlanner({ lang, teacherProfile }: LessonPlannerPro
       setPlan(data);
       setActiveSlideIndex(0);
       setActiveOutputTab("plan");
+      
+      saveOfflineResource({
+        type: "lesson_plan",
+        title: data.title || topic,
+        subject: subject,
+        grade: grade,
+        content: data
+      });
+
       handleExportPPTX(data);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "An error occurred while generating the PowerPoint presentation.");
+      const cached = getOfflineResources().find(
+        (r) => r.type === "lesson_plan" && (r.title.includes(topic) || topic.includes(r.title) || r.subject === subject)
+      );
+      if (cached && cached.content) {
+        setPlan(cached.content);
+        setActiveSlideIndex(0);
+        setActiveOutputTab("plan");
+        handleExportPPTX(cached.content);
+      } else {
+        setError(err.message || (isAr ? "حدث خطأ أثناء توليد عرض العروض التقديمية." : "An error occurred while generating the PowerPoint presentation."));
+      }
     } finally {
       setLoading(false);
       setRetryStatus(null);
