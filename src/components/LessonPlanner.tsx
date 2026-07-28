@@ -208,7 +208,7 @@ export default function LessonPlanner({ lang, teacherProfile, activeCountryCode 
     setRetryStatus(null);
 
     try {
-      const response = await fetchWithRetry(
+      const data: any = await fetchWithRetry(
         "/api/gemini/lesson-plan",
         {
           method: "POST",
@@ -246,7 +246,6 @@ export default function LessonPlanner({ lang, teacherProfile, activeCountryCode 
         }
       );
 
-      const data = await response.json();
       setPlan(data);
       setActiveSlideIndex(0);
       setActiveOutputTab("plan");
@@ -292,7 +291,7 @@ export default function LessonPlanner({ lang, teacherProfile, activeCountryCode 
     setRetryStatus(null);
 
     try {
-      const response = await fetchWithRetry(
+      const data: any = await fetchWithRetry(
         "/api/gemini/lesson-plan",
         {
           method: "POST",
@@ -330,7 +329,6 @@ export default function LessonPlanner({ lang, teacherProfile, activeCountryCode 
         }
       );
 
-      const data = await response.json();
       setPlan(data);
       setActiveSlideIndex(0);
       setActiveOutputTab("plan");

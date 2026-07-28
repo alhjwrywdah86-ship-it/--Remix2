@@ -45,6 +45,40 @@ export async function fetchWithRetry<T = Response>(
       if (contentType && contentType.includes("application/json")) {
         try {
           const json = await response.json();
+          if (json && (typeof json === "object" || Array.isArray(json))) {
+            if (!("json" in json)) {
+              Object.defineProperty(json, "json", {
+                value: async () => json,
+                enumerable: false,
+                configurable: true,
+                writable: true,
+              });
+            }
+            if (!("text" in json)) {
+              Object.defineProperty(json, "text", {
+                value: async () => JSON.stringify(json),
+                enumerable: false,
+                configurable: true,
+                writable: true,
+              });
+            }
+            if (!("ok" in json)) {
+              Object.defineProperty(json, "ok", {
+                value: true,
+                enumerable: false,
+                configurable: true,
+                writable: true,
+              });
+            }
+            if (!("status" in json)) {
+              Object.defineProperty(json, "status", {
+                value: 200,
+                enumerable: false,
+                configurable: true,
+                writable: true,
+              });
+            }
+          }
           return json as T;
         } catch (_) {
           return response as unknown as T;
