@@ -41,7 +41,7 @@ function cleanAndParseJson(text: string): any {
 
 // تهيئة عميل الذكاء الاصطناعي من جوجل باستخدام مفتاح الأمان المتوفر في البيئة
 const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY,
+  apiKey: process.env.GEMINI_API_KEY || "AIzaSy_placeholder_key",
   httpOptions: {
     headers: {
       "User-Agent": "aistudio-build"
@@ -3615,4 +3615,9 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export { app };
+export default app;
