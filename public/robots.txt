@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://remix-remix-648694958321.europe-west1.run.app/sitemap.xml
