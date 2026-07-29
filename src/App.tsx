@@ -329,7 +329,7 @@ export default function App() {
             {currentRole === "teacher" && (
               <>
                 <button
-                  onClick={() => setActiveTab("dashboard")}
+                  onClick={() => navigateToTab("dashboard")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "dashboard"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -341,7 +341,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("classrooms")}
+                  onClick={() => navigateToTab("classrooms")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "classrooms"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -353,7 +353,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("curriculum_library")}
+                  onClick={() => navigateToTab("curriculum_library")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "curriculum_library"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -365,7 +365,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("planner")}
+                  onClick={() => navigateToTab("planner")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "planner"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -377,7 +377,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("presentation")}
+                  onClick={() => navigateToTab("presentation")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "presentation"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -389,7 +389,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("qbank")}
+                  onClick={() => navigateToTab("qbank")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "qbank"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -401,7 +401,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("online_quizzes")}
+                  onClick={() => navigateToTab("online_quizzes")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "online_quizzes"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -413,7 +413,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("smart_analytics")}
+                  onClick={() => navigateToTab("smart_analytics")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "smart_analytics"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -425,7 +425,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("ai_recommendations")}
+                  onClick={() => navigateToTab("ai_recommendations")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "ai_recommendations"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -437,7 +437,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("teacher_library")}
+                  onClick={() => navigateToTab("teacher_library")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "teacher_library"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -454,7 +454,7 @@ export default function App() {
                   </p>
 
                   <button
-                    onClick={() => setActiveTab("student_portal")}
+                    onClick={() => navigateToTab("student_portal")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "student_portal"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -466,7 +466,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("assignments_manager")}
+                    onClick={() => navigateToTab("assignments_manager")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "assignments_manager"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -478,7 +478,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("student_tracking")}
+                    onClick={() => navigateToTab("student_tracking")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "student_tracking"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -490,7 +490,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("parent_portal")}
+                    onClick={() => navigateToTab("parent_portal")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "parent_portal"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -502,7 +502,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("messaging")}
+                    onClick={() => navigateToTab("messaging")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "messaging"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -514,7 +514,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("virtual_classroom")}
+                    onClick={() => navigateToTab("virtual_classroom")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "virtual_classroom"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -526,7 +526,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("gamification")}
+                    onClick={() => navigateToTab("gamification")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "gamification"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -538,7 +538,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("admin_dashboard")}
+                    onClick={() => navigateToTab("admin_dashboard")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "admin_dashboard"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -556,7 +556,7 @@ export default function App() {
                   </p>
 
                   <button
-                    onClick={() => setActiveTab("teacher_marketplace")}
+                    onClick={() => navigateToTab("teacher_marketplace")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "teacher_marketplace"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -568,7 +568,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("teachers_community")}
+                    onClick={() => navigateToTab("teachers_community")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "teachers_community"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -580,7 +580,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("digital_certificates")}
+                    onClick={() => navigateToTab("digital_certificates")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "digital_certificates"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -592,7 +592,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("global_search")}
+                    onClick={() => navigateToTab("global_search")}
                     className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                       activeTab === "global_search"
                         ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -610,7 +610,10 @@ export default function App() {
                   </p>
 
                   <button
-                    onClick={() => setShowSmartSearchModal(true)}
+                    onClick={() => {
+                      setShowSmartSearchModal(true);
+                      setMobileMenuOpen(false);
+                    }}
                     className="w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all text-start cursor-pointer font-bold"
                   >
                     <Search className="w-4 h-4 flex-shrink-0 text-[#C5A021]" />
@@ -618,7 +621,10 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => setShowEssayGraderModal(true)}
+                    onClick={() => {
+                      setShowEssayGraderModal(true);
+                      setMobileMenuOpen(false);
+                    }}
                     className="w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono text-purple-200 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 transition-all text-start cursor-pointer font-bold"
                   >
                     <AwardIcon className="w-4 h-4 flex-shrink-0 text-purple-300" />
@@ -631,7 +637,7 @@ export default function App() {
             {currentRole === "student" && (
               <>
                 <button
-                  onClick={() => setActiveTab("online_quizzes")}
+                  onClick={() => navigateToTab("online_quizzes")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "online_quizzes"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -643,7 +649,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("ai_recommendations")}
+                  onClick={() => navigateToTab("ai_recommendations")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "ai_recommendations"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -659,7 +665,7 @@ export default function App() {
             {currentRole === "supervisor" && (
               <>
                 <button
-                  onClick={() => setActiveTab("smart_analytics")}
+                  onClick={() => navigateToTab("smart_analytics")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "smart_analytics"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -671,7 +677,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("classrooms")}
+                  onClick={() => navigateToTab("classrooms")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "classrooms"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -683,7 +689,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("curriculum_library")}
+                  onClick={() => navigateToTab("curriculum_library")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "curriculum_library"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -695,7 +701,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab("admin")}
+                  onClick={() => navigateToTab("admin")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "admin"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
@@ -713,7 +719,10 @@ export default function App() {
             </p>
 
             <button
-              onClick={() => setShowSubscriptionModal(true)}
+              onClick={() => {
+                setShowSubscriptionModal(true);
+                setMobileMenuOpen(false);
+              }}
               className="w-full flex items-center justify-between p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer bg-gradient-to-r from-amber-500/20 to-amber-600/10 border border-[#C5A021]/30 text-amber-200 hover:text-white hover:border-[#C5A021]"
             >
               <div className="flex items-center gap-2.5">
@@ -726,7 +735,10 @@ export default function App() {
             </button>
 
             <button
-              onClick={() => setShowBackupModal(true)}
+              onClick={() => {
+                setShowBackupModal(true);
+                setMobileMenuOpen(false);
+              }}
               className="w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white"
             >
               <HardDrive className="w-4 h-4 flex-shrink-0 text-emerald-400" />
@@ -737,6 +749,7 @@ export default function App() {
               onClick={() => {
                 setLegalTab("about");
                 setShowLegalModal(true);
+                setMobileMenuOpen(false);
               }}
               className="w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white"
             >
@@ -745,7 +758,10 @@ export default function App() {
             </button>
 
             <button
-              onClick={() => setShowLanding(true)}
+              onClick={() => {
+                setShowLanding(true);
+                setMobileMenuOpen(false);
+              }}
               className="w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white"
             >
               <Home className="w-4 h-4 flex-shrink-0 text-purple-300" />
@@ -757,7 +773,7 @@ export default function App() {
             </p>
 
             <button
-              onClick={() => setActiveTab("about")}
+              onClick={() => navigateToTab("about")}
               className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                 activeTab === "about"
                   ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
