@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
@@ -3588,6 +3589,23 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 // --- إعداد تشغيل الواجهة الأمامية الفورية عبر Vite ---
 async function startServer() {
+  // تقديم الملفات الثابتة من مجلد public مباشرة (مثل ملفات التحقق google*.html)
+  app.use(express.static(path.resolve(process.cwd(), "public")));
+
+  // مسار خاص للتحقق المباشر من ملفات Google Site Verification
+  app.get("/google*.html", (req, res, next) => {
+    const fileName = path.basename(req.path);
+    const publicFile = path.resolve(process.cwd(), "public", fileName);
+    const rootFile = path.resolve(process.cwd(), fileName);
+    
+    if (fs.existsSync(publicFile)) {
+      return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(publicFile);
+    } else if (fs.existsSync(rootFile)) {
+      return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(rootFile);
+    }
+    next();
+  });
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
