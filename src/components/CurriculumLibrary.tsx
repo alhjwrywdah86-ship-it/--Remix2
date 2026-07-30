@@ -19,10 +19,12 @@ import {
   RefreshCw,
   Award,
   ChevronLeft,
+  ChevronDown,
   Book,
   Download
 } from "lucide-react";
 import { fetchWithRetry } from "../utils/fetchWithRetry";
+import { getCanonicalBook } from "../data/canonicalCurricula";
 
 interface CurriculumLibraryProps {
   lang: Language;
@@ -402,7 +404,64 @@ export default function CurriculumLibrary({ lang, onNavigateToTool }: Curriculum
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-xs text-slate-800 leading-relaxed font-sans max-h-96 overflow-y-auto whitespace-pre-wrap">
+                  {(() => {
+                    const canonical = getCanonicalBook(activeBook.id);
+                    if (canonical) {
+                      return (
+                        <div className="space-y-3 bg-amber-50/40 p-4 rounded-xl border border-amber-200">
+                          <div className="flex items-center justify-between border-b border-amber-200/80 pb-2">
+                            <div className="flex items-center gap-2">
+                              <Layers className="w-4 h-4 text-[#C5A021]" />
+                              <h4 className="font-serif font-bold text-sm text-[#1A365D]">
+                                الهيكل المنهجي المعتمد (Canonical Curriculum Structure)
+                              </h4>
+                            </div>
+                            <span className="px-2 py-0.5 bg-[#1A365D] text-white text-[11px] font-mono rounded-full">
+                              {canonical.totalUnits} وحدة | {canonical.totalLessons} درساً
+                            </span>
+                          </div>
+
+                          <div className="space-y-2.5 max-h-96 overflow-y-auto pr-1">
+                            {canonical.units.map((unit) => (
+                              <details key={unit.unitNumber} className="group bg-white rounded-lg border border-slate-200 p-2.5 shadow-xs">
+                                <summary className="flex items-center justify-between font-serif text-xs font-bold text-[#1A365D] cursor-pointer list-none select-none">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-mono flex items-center justify-center">
+                                      {unit.unitNumber}
+                                    </span>
+                                    <span>{unit.unitTitle}</span>
+                                  </div>
+                                  <span className="text-[10px] text-slate-400 font-mono group-open:rotate-180 transition-transform">
+                                    ▼ ({unit.lessons.length} دروس)
+                                  </span>
+                                </summary>
+
+                                <div className="mt-2 pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-1.5 font-mono text-[11px]">
+                                  {unit.lessons.map((les) => (
+                                    <div key={les.lessonNumber} className="p-1.5 bg-slate-50 rounded border border-slate-100 flex items-center justify-between gap-1">
+                                      <span className="text-slate-800 font-medium truncate">{les.lessonTitle}</span>
+                                      {onNavigateToTool && (
+                                        <button
+                                          onClick={() => onNavigateToTool("planner", { grade: activeBook.grade, subject: activeBook.subject, lessonTitle: les.lessonTitle, unit: unit.unitTitle })}
+                                          className="text-[9px] px-1.5 py-0.5 bg-[#1A365D] text-white rounded hover:bg-[#122846] cursor-pointer whitespace-nowrap"
+                                          title="تحضير هذا الدرس"
+                                        >
+                                          تحضير
+                                        </button>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </details>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-xs text-slate-800 leading-relaxed font-sans max-h-80 overflow-y-auto whitespace-pre-wrap">
                     {bookFullText}
                   </div>
 
