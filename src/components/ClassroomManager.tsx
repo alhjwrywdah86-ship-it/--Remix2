@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Classroom, Student, AttendanceEntry } from "../types";
+import ParentMessagingModal from "./ParentMessagingModal";
 import {
   Users,
   Plus,
@@ -14,7 +15,8 @@ import {
   Check,
   Search,
   Sparkles,
-  ClipboardList
+  ClipboardList,
+  MessageSquare
 } from "lucide-react";
 
 interface ClassroomManagerProps {
@@ -27,6 +29,10 @@ export default function ClassroomManager({ isAr }: ClassroomManagerProps) {
   const [showAddClassModal, setShowAddClassModal] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [activeTab, setActiveTab] = useState<"students" | "attendance">("students");
+
+  // Messaging Modal State
+  const [showMessagingModal, setShowMessagingModal] = useState(false);
+  const [selectedStudentForMessaging, setSelectedStudentForMessaging] = useState<Student | null>(null);
 
   // New Class Form
   const [newClassName, setNewClassName] = useState("");
@@ -193,26 +199,52 @@ export default function ClassroomManager({ isAr }: ClassroomManagerProps) {
         </button>
       </div>
 
-      {/* Classroom Selection Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        {classrooms.map((cls) => (
+      {/* Empty State when no classrooms exist */}
+      {classrooms.length === 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-4 shadow-sm my-6">
+          <div className="w-16 h-16 bg-[#1A365D]/10 text-[#1A365D] rounded-full flex items-center justify-center mx-auto">
+            <Users className="w-8 h-8 text-[#1A365D]" />
+          </div>
+          <h3 className="text-xl font-serif font-bold text-[#1A365D]">
+            {isAr ? "لا توجد فصول دراسية مسجلة حالياً" : "No Classrooms Registered Yet"}
+          </h3>
+          <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+            {isAr
+              ? "ابدأ بإنشاء فصلك الدراسي الأول وتنسيق بيانات الطلاب الحقيقيين لتتمكن من متابعة الدرجات والحضور ومراسلة أولياء الأمور بسهولة."
+              : "Start by creating your first classroom and adding real students."}
+          </p>
           <button
-            key={cls.id}
-            onClick={() => setSelectedClassId(cls.id)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold font-serif transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-              cls.id === selectedClassId
-                ? "bg-[#1A365D] text-[#C5A021] border-2 border-[#C5A021] shadow-sm"
-                : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
-            }`}
+            onClick={() => setShowAddClassModal(true)}
+            className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#1A365D] bg-[#C5A021] hover:bg-amber-400 inline-flex items-center gap-2 cursor-pointer shadow-md transition-all"
           >
-            <BookOpen className="w-4 h-4 text-[#C5A021]" />
-            <span>{cls.name}</span>
-            <span className="bg-[#C5A021]/20 text-[#1A365D] px-2 py-0.5 rounded-full text-[10px]">
-              {cls.students ? cls.students.length : 0} {isAr ? "طالب" : "students"}
-            </span>
+            <Plus className="w-4 h-4" />
+            <span>{isAr ? "إنشاء فصل دراسي جديد" : "Create New Classroom"}</span>
           </button>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {/* Classroom Selection Pills */}
+      {classrooms.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          {classrooms.map((cls) => (
+            <button
+              key={cls.id}
+              onClick={() => setSelectedClassId(cls.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold font-serif transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                cls.id === selectedClassId
+                  ? "bg-[#1A365D] text-[#C5A021] border-2 border-[#C5A021] shadow-sm"
+                  : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              <BookOpen className="w-4 h-4 text-[#C5A021]" />
+              <span>{cls.name}</span>
+              <span className="bg-[#C5A021]/20 text-[#1A365D] px-2 py-0.5 rounded-full text-[10px]">
+                {cls.students ? cls.students.length : 0} {isAr ? "طالب" : "students"}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Active Classroom Details */}
       {activeClassroom && (
@@ -291,13 +323,14 @@ export default function ClassroomManager({ isAr }: ClassroomManagerProps) {
                       <th className="p-3 text-center">{isAr ? "المشاركة (20)" : "Participation"}</th>
                       <th className="p-3 text-center">{isAr ? "الاختبار (50)" : "Exam"}</th>
                       <th className="p-3 text-center">{isAr ? "المجموع (100)" : "Final Score"}</th>
-                      <th className="p-3 text-start rounded-e-lg">{isAr ? "ملاحظات المعلم" : "Notes"}</th>
+                      <th className="p-3 text-start">{isAr ? "ملاحظات المعلم" : "Notes"}</th>
+                      <th className="p-3 text-center rounded-e-lg">{isAr ? "إجراء الإرسال" : "Action"}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {(!activeClassroom.students || activeClassroom.students.length === 0) ? (
                       <tr>
-                        <td colSpan={7} className="p-8 text-center text-slate-500 font-serif">
+                        <td colSpan={8} className="p-8 text-center text-slate-500 font-serif">
                           {isAr ? "لا يوجد طلاب مضافين لهذا الفصل بعد. اضغط على 'إضافة طالب' لإدخال أسماء الطلاب." : "No students added yet."}
                         </td>
                       </tr>
@@ -323,6 +356,19 @@ export default function ClassroomManager({ isAr }: ClassroomManagerProps) {
                             </span>
                           </td>
                           <td className="p-3 text-slate-600 font-serif text-[11px]">{st.notes || "-"}</td>
+                          <td className="p-3 text-center">
+                            <button
+                              onClick={() => {
+                                setSelectedStudentForMessaging(st);
+                                setShowMessagingModal(true);
+                              }}
+                              className="px-2.5 py-1.5 bg-[#1A365D] hover:bg-[#2A4A7F] text-white rounded-lg font-bold text-[11px] inline-flex items-center gap-1 shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                              title={isAr ? "مراسلة ولي الأمر وإرسال تقرير المتابعة" : "Message Parent"}
+                            >
+                              <MessageSquare className="w-3.5 h-3.5 text-[#C5A021]" />
+                              <span>{isAr ? "مراسلة ولي الأمر" : "Message Parent"}</span>
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -583,6 +629,20 @@ export default function ClassroomManager({ isAr }: ClassroomManagerProps) {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Parent Messaging Modal */}
+      {showMessagingModal && (
+        <ParentMessagingModal
+          isOpen={showMessagingModal}
+          onClose={() => {
+            setShowMessagingModal(false);
+            setSelectedStudentForMessaging(null);
+          }}
+          student={selectedStudentForMessaging}
+          classroomSubject={activeClassroom?.subject || "اللغة العربية"}
+          isAr={isAr}
+        />
       )}
     </div>
   );

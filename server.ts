@@ -3416,52 +3416,109 @@ app.post("/api/virtual-classroom/posts/:id/comment", (req, res) => {
 });
 
 // 7. System Admin API
+let adminSchoolsDb = [
+  {
+    id: "sch_1",
+    name: "مدرسة المتفوقين النموذجية",
+    region: "أمانة العاصمة - صنعاء",
+    educationalStage: "المرحلة الأساسية والثانوية",
+    teachersCount: 32,
+    studentsCount: 850,
+    classroomsCount: 20,
+    principalName: "د. عبد الله الماوري",
+    status: "نشط"
+  },
+  {
+    id: "sch_2",
+    name: "مجمع الثورة التعليمي الذكي",
+    region: "محافظة تعز",
+    educationalStage: "جميع المراحل",
+    teachersCount: 45,
+    studentsCount: 1120,
+    classroomsCount: 28,
+    principalName: "أ. محمد الكهالي",
+    status: "نشط"
+  },
+  {
+    id: "sch_3",
+    name: "ثانوية الكويت النموذجية للبنين",
+    region: "صنعاء - السبعين",
+    educationalStage: "المرحلة الثانوية",
+    teachersCount: 28,
+    studentsCount: 640,
+    classroomsCount: 16,
+    principalName: "أ. علي الحيمي",
+    status: "نشط"
+  }
+];
+
 app.get("/api/admin/overview", (req, res) => {
+  const totalTeachers = adminSchoolsDb.reduce((acc, s) => acc + (s.teachersCount || 0), 0);
+  const totalStudents = adminSchoolsDb.reduce((acc, s) => acc + (s.studentsCount || 0), 0);
+  const totalClassrooms = adminSchoolsDb.reduce((acc, s) => acc + (s.classroomsCount || 0), 0);
+
   res.json({
-    totalSchools: 12,
-    totalTeachers: 148,
-    totalStudents: 3420,
-    totalParents: 2150,
-    totalClassrooms: 86,
+    totalSchools: adminSchoolsDb.length,
+    totalTeachers: totalTeachers || 148,
+    totalStudents: totalStudents || 3420,
+    totalParents: Math.round((totalStudents || 3420) * 0.65),
+    totalClassrooms: totalClassrooms || 86,
     totalAssignments: 512,
     activeQuizzes: 42,
     dailyActiveUsers: 890,
-    schools: [
-      {
-        id: "sch_1",
-        name: "مدرسة المتفوقين النموذجية",
-        region: "أمانة العاصمة - صنعاء",
-        educationalStage: "المرحلة الأساسية والثانوية",
-        teachersCount: 32,
-        studentsCount: 850,
-        classroomsCount: 20,
-        principalName: "د. عبد الله الماوري",
-        status: "نشط"
-      },
-      {
-        id: "sch_2",
-        name: "مجمع الثورة التعليمي الذكي",
-        region: "محافظة تعز",
-        educationalStage: "جميع المراحل",
-        teachersCount: 45,
-        studentsCount: 1120,
-        classroomsCount: 28,
-        principalName: "أ. محمد الكهالي",
-        status: "نشط"
-      },
-      {
-        id: "sch_3",
-        name: "ثانوية الكويت النموذجية للبنين",
-        region: "صنعاء - السبعين",
-        educationalStage: "المرحلة الثانوية",
-        teachersCount: 28,
-        studentsCount: 640,
-        classroomsCount: 16,
-        principalName: "أ. علي الحيمي",
-        status: "نشط"
-      }
-    ]
+    schools: adminSchoolsDb
   });
+});
+
+app.post("/api/admin/schools", express.json(), (req, res) => {
+  const { name, region, educationalStage, teachersCount, studentsCount, classroomsCount, principalName, status } = req.body;
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: "اسم المدرسة مطلوب" });
+  }
+
+  const newSchool = {
+    id: `sch_${Date.now()}`,
+    name: name.trim(),
+    region: region ? region.trim() : "أمانة العاصمة - صنعاء",
+    educationalStage: educationalStage || "المرحلة الأساسية والثانوية",
+    teachersCount: Number(teachersCount) || 20,
+    studentsCount: Number(studentsCount) || 500,
+    classroomsCount: Number(classroomsCount) || 15,
+    principalName: principalName ? principalName.trim() : "أ. مدير المدرسة",
+    status: status === "تحت المراجعة" ? "تحت المراجعة" : "نشط"
+  };
+
+  adminSchoolsDb.unshift(newSchool);
+  res.json({ success: true, school: newSchool });
+});
+
+app.put("/api/admin/schools/:id", express.json(), (req, res) => {
+  const { id } = req.params;
+  const index = adminSchoolsDb.findIndex(s => s.id === id);
+  if (index === -1) {
+    return res.status(404).json({ error: "المدرسة غير موجودة" });
+  }
+
+  const { name, region, educationalStage, teachersCount, studentsCount, classroomsCount, principalName, status } = req.body;
+  adminSchoolsDb[index] = {
+    ...adminSchoolsDb[index],
+    name: name ? name.trim() : adminSchoolsDb[index].name,
+    region: region ? region.trim() : adminSchoolsDb[index].region,
+    educationalStage: educationalStage || adminSchoolsDb[index].educationalStage,
+    teachersCount: teachersCount !== undefined ? Number(teachersCount) : adminSchoolsDb[index].teachersCount,
+    studentsCount: studentsCount !== undefined ? Number(studentsCount) : adminSchoolsDb[index].studentsCount,
+    classroomsCount: classroomsCount !== undefined ? Number(classroomsCount) : adminSchoolsDb[index].classroomsCount,
+    principalName: principalName ? principalName.trim() : adminSchoolsDb[index].principalName,
+    status: status || adminSchoolsDb[index].status
+  };
+
+  res.json({ success: true, school: adminSchoolsDb[index] });
+});
+
+app.delete("/api/admin/schools/:id", (req, res) => {
+  const { id } = req.params;
+  adminSchoolsDb = adminSchoolsDb.filter(s => s.id !== id);
+  res.json({ success: true });
 });
 
 

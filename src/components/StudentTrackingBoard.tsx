@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { DailyTrackingEntry, Language, Classroom } from "../types";
+import { DailyTrackingEntry, Language, Classroom, Student } from "../types";
 import { fetchWithRetry } from "../utils/fetchWithRetry";
+import ParentMessagingModal from "./ParentMessagingModal";
 import {
   UserCheck,
   Calendar,
@@ -12,7 +13,8 @@ import {
   Award,
   RefreshCw,
   FileText,
-  Save
+  Save,
+  MessageSquare
 } from "lucide-react";
 
 interface StudentTrackingBoardProps {
@@ -32,6 +34,10 @@ export default function StudentTrackingBoard({ lang }: StudentTrackingBoardProps
 
   const [generatedReport, setGeneratedReport] = useState<string | null>(null);
   const [generatingReport, setGeneratingReport] = useState(false);
+
+  // Messaging Modal State
+  const [showMessagingModal, setShowMessagingModal] = useState(false);
+  const [selectedStudentForMessaging, setSelectedStudentForMessaging] = useState<Student | null>(null);
 
   useEffect(() => {
     fetchClassrooms();
@@ -223,86 +229,132 @@ export default function StudentTrackingBoard({ lang }: StudentTrackingBoardProps
                 <th className="p-3.5">المشاركة الصفية</th>
                 <th className="p-3.5">إنجاز الواجب</th>
                 <th className="p-3.5">ملاحظات المعلم</th>
+                <th className="p-3.5 text-center">إجراء المراسلة</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 font-sans">
-              {trackingList.map((entry) => (
-                <tr key={entry.studentId} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="p-3.5 font-bold text-[#1A365D]">{entry.studentName}</td>
-
-                  {/* Attendance buttons */}
-                  <td className="p-3.5">
-                    <div className="flex items-center gap-1 font-mono">
-                      {(["present", "absent", "late", "excused"] as const).map((status) => (
-                        <button
-                          key={status}
-                          onClick={() => handleStatusChange(entry.studentId, status)}
-                          className={`px-2 py-1 rounded text-[10px] font-bold cursor-pointer transition-all ${
-                            entry.attendance === status
-                              ? status === "present"
-                                ? "bg-emerald-600 text-white"
-                                : status === "absent"
-                                ? "bg-rose-600 text-white"
-                                : status === "late"
-                                ? "bg-amber-600 text-white"
-                                : "bg-blue-600 text-white"
-                              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                          }`}
-                        >
-                          {status === "present" && "حاضر"}
-                          {status === "absent" && "غائب"}
-                          {status === "late" && "متأخر"}
-                          {status === "excused" && "بعذر"}
-                        </button>
-                      ))}
-                    </div>
-                  </td>
-
-                  {/* Participation */}
-                  <td className="p-3.5">
-                    <select
-                      value={entry.participationLevel}
-                      onChange={(e) => handleParticipationChange(entry.studentId, e.target.value)}
-                      className="p-1.5 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-[#1A365D] outline-none"
-                    >
-                      <option value="ممتاز">ممتاز ⭐⭐⭐</option>
-                      <option value="جيد جداً">جيد جداً ⭐⭐</option>
-                      <option value="متوسط">متوسط ⭐</option>
-                      <option value="ضعيف">يحتاج تشجيع</option>
-                    </select>
-                  </td>
-
-                  {/* Homework Checkbox */}
-                  <td className="p-3.5">
-                    <label className="inline-flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={entry.homeworkCompleted}
-                        onChange={() => handleHomeworkToggle(entry.studentId)}
-                        className="w-4 h-4 text-[#1A365D] rounded accent-[#1A365D]"
-                      />
-                      <span className={entry.homeworkCompleted ? "text-emerald-700 font-bold" : "text-rose-600"}>
-                        {entry.homeworkCompleted ? "مكتمل ✔" : "غير مكتمل ❌"}
-                      </span>
-                    </label>
-                  </td>
-
-                  {/* Teacher Notes */}
-                  <td className="p-3.5">
-                    <input
-                      type="text"
-                      value={entry.notes}
-                      onChange={(e) => handleNotesChange(entry.studentId, e.target.value)}
-                      placeholder="أضف ملاحظة أو ثناء..."
-                      className="w-full p-1.5 bg-slate-50 border border-slate-200 rounded text-xs outline-none focus:border-[#C5A021]"
-                    />
+              {trackingList.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-slate-500 font-serif">
+                    {isAr ? "لا يوجد طلاب مسجلون في هذا الفصل حتى الآن." : "No registered students in this classroom."}
                   </td>
                 </tr>
-              ))}
+              ) : (
+                trackingList.map((entry) => (
+                  <tr key={entry.studentId} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="p-3.5 font-bold text-[#1A365D]">{entry.studentName}</td>
+
+                    {/* Attendance buttons */}
+                    <td className="p-3.5">
+                      <div className="flex items-center gap-1 font-mono">
+                        {(["present", "absent", "late", "excused"] as const).map((status) => (
+                          <button
+                            key={status}
+                            onClick={() => handleStatusChange(entry.studentId, status)}
+                            className={`px-2 py-1 rounded text-[10px] font-bold cursor-pointer transition-all ${
+                              entry.attendance === status
+                                ? status === "present"
+                                  ? "bg-emerald-600 text-white"
+                                  : status === "absent"
+                                  ? "bg-rose-600 text-white"
+                                  : status === "late"
+                                  ? "bg-amber-600 text-white"
+                                  : "bg-blue-600 text-white"
+                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            }`}
+                          >
+                            {status === "present" && "حاضر"}
+                            {status === "absent" && "غائب"}
+                            {status === "late" && "متأخر"}
+                            {status === "excused" && "بعذر"}
+                          </button>
+                        ))}
+                      </div>
+                    </td>
+
+                    {/* Participation */}
+                    <td className="p-3.5">
+                      <select
+                        value={entry.participationLevel}
+                        onChange={(e) => handleParticipationChange(entry.studentId, e.target.value)}
+                        className="p-1.5 bg-slate-50 border border-slate-200 rounded text-xs font-bold text-[#1A365D] outline-none"
+                      >
+                        <option value="ممتاز">ممتاز ⭐⭐⭐</option>
+                        <option value="جيد جداً">جيد جداً ⭐⭐</option>
+                        <option value="متوسط">متوسط ⭐</option>
+                        <option value="ضعيف">يحتاج تشجيع</option>
+                      </select>
+                    </td>
+
+                    {/* Homework Checkbox */}
+                    <td className="p-3.5">
+                      <label className="inline-flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={entry.homeworkCompleted}
+                          onChange={() => handleHomeworkToggle(entry.studentId)}
+                          className="w-4 h-4 text-[#1A365D] rounded accent-[#1A365D]"
+                        />
+                        <span className={entry.homeworkCompleted ? "text-emerald-700 font-bold" : "text-rose-600"}>
+                          {entry.homeworkCompleted ? "مكتمل ✔" : "غير مكتمل ❌"}
+                        </span>
+                      </label>
+                    </td>
+
+                    {/* Teacher Notes */}
+                    <td className="p-3.5">
+                      <input
+                        type="text"
+                        value={entry.notes}
+                        onChange={(e) => handleNotesChange(entry.studentId, e.target.value)}
+                        placeholder="أضف ملاحظة أو ثناء..."
+                        className="w-full p-1.5 bg-slate-50 border border-slate-200 rounded text-xs outline-none focus:border-[#C5A021]"
+                      />
+                    </td>
+
+                    {/* Parent Messaging Button */}
+                    <td className="p-3.5 text-center">
+                      <button
+                        onClick={() => {
+                          setSelectedStudentForMessaging({
+                            id: entry.studentId,
+                            name: entry.studentName,
+                            grade: "الصف الدراسي",
+                            homework: entry.homeworkCompleted ? 28 : 15,
+                            participation: entry.participationLevel === "ممتاز" ? 20 : 15,
+                            exam: 40,
+                            finalScore: 85,
+                            notes: entry.notes || ""
+                          });
+                          setShowMessagingModal(true);
+                        }}
+                        className="px-2.5 py-1.5 bg-[#1A365D] hover:bg-[#2A4A7F] text-white rounded-lg font-bold text-[11px] inline-flex items-center gap-1 shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                        title="مراسلة ولي الأمر"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 text-[#C5A021]" />
+                        <span>مراسلة ولي الأمر</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Parent Messaging Modal */}
+      {showMessagingModal && (
+        <ParentMessagingModal
+          isOpen={showMessagingModal}
+          onClose={() => {
+            setShowMessagingModal(false);
+            setSelectedStudentForMessaging(null);
+          }}
+          student={selectedStudentForMessaging}
+          isAr={isAr}
+        />
+      )}
     </div>
   );
 }
