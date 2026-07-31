@@ -12,7 +12,7 @@ createRoot(document.getElementById('root')!).render(
 // Register Progressive Web App Service Worker for Mobile & Offline support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
       .then((reg) => {
         console.log('PWA Service Worker registered successfully:', reg.scope);
       })

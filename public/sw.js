@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arab-teacher-lms-v4';
+const CACHE_NAME = 'teacher-app-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
