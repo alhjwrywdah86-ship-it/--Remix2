@@ -144,16 +144,9 @@ const handleGeminiError = (error: any, res: express.Response) => {
 
 // --- PWA ICON & ASSET HANDLING ---
 app.get("/favicon.ico", (req, res) => {
-  res.setHeader("Content-Type", "image/svg+xml");
+  res.setHeader("Content-Type", "image/png");
   res.setHeader("Cache-Control", "public, max-age=86400");
-  res.send(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-    <rect width="512" height="512" rx="100" fill="#1A365D"/>
-    <rect x="20" y="20" width="472" height="472" rx="80" fill="none" stroke="#C5A021" stroke-width="12"/>
-    <path d="M256 120 L380 190 L256 260 L132 190 Z" fill="#C5A021"/>
-    <path d="M165 220 L165 310 Q256 370 347 310 L347 220" fill="none" stroke="#C5A021" stroke-width="20" stroke-linecap="round"/>
-    <circle cx="256" cy="380" r="16" fill="#C5A021"/>
-    <text x="256" y="440" font-family="sans-serif" font-weight="bold" font-size="36" fill="#FFFFFF" text-anchor="middle">المعلم المحترف</text>
-  </svg>`);
+  res.sendFile(path.join(process.cwd(), "public", "pwa-192x192.png"));
 });
 
 // --- PHASE 5: SYSTEM AUDIT LOGS & RESPONSE CACHING ENGINE ---
