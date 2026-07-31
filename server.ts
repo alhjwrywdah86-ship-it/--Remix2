@@ -143,7 +143,7 @@ const handleGeminiError = (error: any, res: express.Response) => {
 };
 
 // --- PWA ICON & ASSET HANDLING ---
-app.get(["/pwa-192x192.png", "/pwa-512x512.png", "/favicon.ico"], (req, res) => {
+app.get("/favicon.ico", (req, res) => {
   res.setHeader("Content-Type", "image/svg+xml");
   res.setHeader("Cache-Control", "public, max-age=86400");
   res.send(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
