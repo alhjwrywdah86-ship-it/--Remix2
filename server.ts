@@ -142,11 +142,47 @@ const handleGeminiError = (error: any, res: express.Response) => {
   });
 };
 
-// --- PWA ICON & ASSET HANDLING ---
+// --- PWA ICON & ASSET & SEO HANDLING ---
 app.get("/favicon.ico", (req, res) => {
   res.setHeader("Content-Type", "image/png");
   res.setHeader("Cache-Control", "public, max-age=86400");
   res.sendFile(path.join(process.cwd(), "public", "pwa-192x192.png"));
+});
+
+app.get("/pwa-192x192.png", (req, res) => {
+  res.setHeader("Content-Type", "image/png");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.sendFile(path.join(process.cwd(), "public", "pwa-192x192.png"));
+});
+
+app.get("/pwa-512x512.png", (req, res) => {
+  res.setHeader("Content-Type", "image/png");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.sendFile(path.join(process.cwd(), "public", "pwa-512x512.png"));
+});
+
+app.get("/sw.js", (req, res) => {
+  res.setHeader("Content-Type", "application/javascript; charset=UTF-8");
+  res.setHeader("Cache-Control", "no-cache");
+  res.sendFile(path.join(process.cwd(), "public", "sw.js"));
+});
+
+app.get("/manifest.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json; charset=UTF-8");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res.sendFile(path.join(process.cwd(), "public", "manifest.json"));
+});
+
+app.get("/robots.txt", (req, res) => {
+  res.setHeader("Content-Type", "text/plain; charset=UTF-8");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.sendFile(path.join(process.cwd(), "public", "robots.txt"));
+});
+
+app.get("/sitemap.xml", (req, res) => {
+  res.setHeader("Content-Type", "application/xml; charset=UTF-8");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.sendFile(path.join(process.cwd(), "public", "sitemap.xml"));
 });
 
 // --- PHASE 5: SYSTEM AUDIT LOGS & RESPONSE CACHING ENGINE ---
@@ -3739,8 +3775,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 // --- إعداد تشغيل الواجهة الأمامية الفورية عبر Vite ---
 async function startServer() {
-  // تقديم الملفات الثابتة من مجلد public مباشرة (مثل ملفات التحقق google*.html)
-  app.use(express.static(path.resolve(process.cwd(), "public")));
+  // تقديم الملفات الثابتة من مجلد public مباشرة مع إلغاء الفهرسة التلقائية لتجنب اعتراض الصفحة الرئيسية
+  app.use(express.static(path.resolve(process.cwd(), "public"), { index: false }));
 
   // مسار خاص للتحقق المباشر من ملفات Google Site Verification
   app.get("/google*.html", (req, res, next) => {
@@ -3763,18 +3799,28 @@ async function startServer() {
     });
     app.use(vite.middlewares);
     
+    app.get("/", (req, res) => {
+      const template = path.resolve(process.cwd(), "index.html");
+      res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(template);
+    });
+
     app.use("*", async (req, res, next) => {
       try {
         const template = path.resolve(process.cwd(), "index.html");
-        res.status(200).set({ "Content-Type": "text/html" }).sendFile(template);
+        res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(template);
       } catch (e) {
         next(e);
       }
     });
   } else {
-    app.use(express.static(path.resolve(process.cwd(), "dist")));
+    app.use(express.static(path.resolve(process.cwd(), "dist"), { index: false }));
+    
+    app.get("/", (req, res) => {
+      res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(path.resolve(process.cwd(), "dist", "index.html"));
+    });
+
     app.get("*", (req, res) => {
-      res.sendFile(path.resolve(process.cwd(), "dist", "index.html"));
+      res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(path.resolve(process.cwd(), "dist", "index.html"));
     });
   }
 
