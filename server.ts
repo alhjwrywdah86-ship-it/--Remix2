@@ -146,43 +146,71 @@ const handleGeminiError = (error: any, res: express.Response) => {
 app.get("/favicon.ico", (req, res) => {
   res.setHeader("Content-Type", "image/png");
   res.setHeader("Cache-Control", "public, max-age=86400");
-  res.sendFile(path.join(process.cwd(), "public", "pwa-192x192.png"));
+  const iconPath = path.join(process.cwd(), "public", "pwa-192x192.png");
+  if (fs.existsSync(iconPath)) {
+    return res.sendFile(iconPath);
+  }
+  res.status(404).send("Not found");
 });
 
 app.get("/pwa-192x192.png", (req, res) => {
   res.setHeader("Content-Type", "image/png");
   res.setHeader("Cache-Control", "public, max-age=86400");
-  res.sendFile(path.join(process.cwd(), "public", "pwa-192x192.png"));
+  const iconPath = path.join(process.cwd(), "public", "pwa-192x192.png");
+  if (fs.existsSync(iconPath)) {
+    return res.sendFile(iconPath);
+  }
+  res.status(404).send("Not found");
 });
 
 app.get("/pwa-512x512.png", (req, res) => {
   res.setHeader("Content-Type", "image/png");
   res.setHeader("Cache-Control", "public, max-age=86400");
-  res.sendFile(path.join(process.cwd(), "public", "pwa-512x512.png"));
+  const iconPath = path.join(process.cwd(), "public", "pwa-512x512.png");
+  if (fs.existsSync(iconPath)) {
+    return res.sendFile(iconPath);
+  }
+  res.status(404).send("Not found");
 });
 
 app.get("/sw.js", (req, res) => {
   res.setHeader("Content-Type", "application/javascript; charset=UTF-8");
   res.setHeader("Cache-Control", "no-cache");
-  res.sendFile(path.join(process.cwd(), "public", "sw.js"));
+  const swPath = path.join(process.cwd(), "public", "sw.js");
+  if (fs.existsSync(swPath)) {
+    return res.sendFile(swPath);
+  }
+  res.status(404).send("Not found");
 });
 
 app.get("/manifest.json", (req, res) => {
   res.setHeader("Content-Type", "application/json; charset=UTF-8");
   res.setHeader("Cache-Control", "public, max-age=3600");
-  res.sendFile(path.join(process.cwd(), "public", "manifest.json"));
+  const manifestPath = path.join(process.cwd(), "public", "manifest.json");
+  if (fs.existsSync(manifestPath)) {
+    return res.sendFile(manifestPath);
+  }
+  res.status(404).send("Not found");
 });
 
 app.get("/robots.txt", (req, res) => {
   res.setHeader("Content-Type", "text/plain; charset=UTF-8");
   res.setHeader("Cache-Control", "public, max-age=86400");
-  res.sendFile(path.join(process.cwd(), "public", "robots.txt"));
+  const robotsPath = path.join(process.cwd(), "public", "robots.txt");
+  if (fs.existsSync(robotsPath)) {
+    return res.sendFile(robotsPath);
+  }
+  res.status(404).send("Not found");
 });
 
 app.get("/sitemap.xml", (req, res) => {
   res.setHeader("Content-Type", "application/xml; charset=UTF-8");
   res.setHeader("Cache-Control", "public, max-age=86400");
-  res.sendFile(path.join(process.cwd(), "public", "sitemap.xml"));
+  const sitemapPath = path.join(process.cwd(), "public", "sitemap.xml");
+  if (fs.existsSync(sitemapPath)) {
+    return res.sendFile(sitemapPath);
+  }
+  res.status(404).send("Not found");
 });
 
 // --- PHASE 5: SYSTEM AUDIT LOGS & RESPONSE CACHING ENGINE ---
