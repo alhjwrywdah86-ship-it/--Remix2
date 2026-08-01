@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teacher-app-v5';
+const CACHE_NAME = 'teacher-app-v9';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

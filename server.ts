@@ -173,6 +173,26 @@ app.get("/pwa-512x512.png", (req, res) => {
   res.status(404).send("Not found");
 });
 
+app.get("/app-icon.png", (req, res) => {
+  res.setHeader("Content-Type", "image/png");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  const iconPath = path.join(process.cwd(), "public", "app-icon.png");
+  if (fs.existsSync(iconPath)) {
+    return res.sendFile(iconPath);
+  }
+  res.status(404).send("Not found");
+});
+
+app.get("/apple-touch-icon.png", (req, res) => {
+  res.setHeader("Content-Type", "image/png");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  const iconPath = path.join(process.cwd(), "public", "apple-touch-icon.png");
+  if (fs.existsSync(iconPath)) {
+    return res.sendFile(iconPath);
+  }
+  res.status(404).send("Not found");
+});
+
 app.get("/sw.js", (req, res) => {
   res.setHeader("Content-Type", "application/javascript; charset=UTF-8");
   res.setHeader("Cache-Control", "no-cache");
