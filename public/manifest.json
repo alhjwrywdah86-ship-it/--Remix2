@@ -4,28 +4,16 @@
   "description": "منصة تعليمية ذكية متكاملة تجمع المعلم، الطالب، ولي الأمر، والإدارة التعليمية مع دعم الذكاء الاصطناعي.",
   "icons": [
     {
-      "src": "/pwa-192x192.png",
-      "type": "image/png",
+      "src": "/pwa-192x192.png?v=2",
       "sizes": "192x192",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/pwa-192x192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/pwa-512x512.png",
-      "type": "image/png",
+      "src": "/pwa-512x512.png?v=2",
       "sizes": "512x512",
-      "purpose": "any"
-    },
-    {
-      "src": "/pwa-512x512.png",
       "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",

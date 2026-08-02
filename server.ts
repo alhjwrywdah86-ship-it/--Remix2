@@ -3818,52 +3818,53 @@ app.post("/api/search/global", async (req, res) => {
 });
 
 
-// --- معالجة المسارات غير الموجودة للأي بي آي وحماية الأخطاء العامة ---
-app.all("/api/*", (req, res) => {
-  res.status(404).json({
-    error: `المسار المطلوب غير موجود في الخادم / The requested API endpoint '${req.path}' was not found.`
-  });
-});
-
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("خطأ عام غير معالج في السيرفر:", err);
-  res.status(res.statusCode === 200 ? 500 : res.statusCode).json({
-    error: err.message || "حدث خطأ غير متوقع في الخادم / An unexpected server error occurred."
-  });
-});
-
-// --- إعداد تشغيل الواجهة الأمامية الفورية عبر Vite ---
+// --- إعداد تشغيل الواجهة الأمامية الفورية عبر Vite وخدمة الملفات الثابتة ---
 async function startServer() {
-  // تقديم الملفات الثابتة من مجلد public مباشرة مع إلغاء الفهرسة التلقائية لتجنب اعتراض الصفحة الرئيسية
+  // 1. تقديم الملفات الثابتة من مجلد public بدون فهرسة تلقائية لمنع استبدال الصفحة الرئيسية
   app.use(express.static(path.resolve(process.cwd(), "public"), { index: false }));
 
-  // مسار خاص للتحقق المباشر من ملفات Google Site Verification
+  // 2. تقديم الملفات الثابتة من مجلد dist (في بيئة الإنتاج)
+  const distPath = path.resolve(process.cwd(), "dist");
+  if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath, { index: false }));
+  }
+
+  // 3. مسار خاص للتحقق المباشر من ملفات Google Site Verification
   app.get("/google*.html", (req, res, next) => {
     const fileName = path.basename(req.path);
     const publicFile = path.resolve(process.cwd(), "public", fileName);
+    const distFile = path.resolve(process.cwd(), "dist", fileName);
     const rootFile = path.resolve(process.cwd(), fileName);
     
     if (fs.existsSync(publicFile)) {
       return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(publicFile);
+    } else if (fs.existsSync(distFile)) {
+      return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(distFile);
     } else if (fs.existsSync(rootFile)) {
       return res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(rootFile);
     }
     next();
   });
 
+  // 4. إعداد بيئة التطوير (Vite) أو بيئة الإنتاج (Production)
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
-    
+
+    // المسار المباشر للصفحة الرئيسية في بيئة التطوير
     app.get("/", (req, res) => {
       const template = path.resolve(process.cwd(), "index.html");
       res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(template);
     });
 
-    app.use("*", async (req, res, next) => {
+    // المسار الشامل لصفحات التطبيق SPA في بيئة التطوير
+    app.get("*", (req, res, next) => {
+      if (req.path.startsWith("/api/")) {
+        return next();
+      }
       try {
         const template = path.resolve(process.cwd(), "index.html");
         res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(template);
@@ -3872,19 +3873,43 @@ async function startServer() {
       }
     });
   } else {
-    app.use(express.static(path.resolve(process.cwd(), "dist"), { index: false }));
-    
+    // المسار المباشر للصفحة الرئيسية في بيئة الإنتاج (Railway / Cloud Run)
     app.get("/", (req, res) => {
-      res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(path.resolve(process.cwd(), "dist", "index.html"));
+      const distIndex = path.resolve(process.cwd(), "dist", "index.html");
+      const rootIndex = path.resolve(process.cwd(), "index.html");
+      const targetFile = fs.existsSync(distIndex) ? distIndex : rootIndex;
+      res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(targetFile);
     });
 
-    app.get("*", (req, res) => {
-      res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(path.resolve(process.cwd(), "dist", "index.html"));
+    // المسار الشامل لصفحات التطبيق SPA في بيئة الإنتاج
+    app.get("*", (req, res, next) => {
+      if (req.path.startsWith("/api/")) {
+        return next();
+      }
+      const distIndex = path.resolve(process.cwd(), "dist", "index.html");
+      const rootIndex = path.resolve(process.cwd(), "index.html");
+      const targetFile = fs.existsSync(distIndex) ? distIndex : rootIndex;
+      res.status(200).set({ "Content-Type": "text/html; charset=utf-8" }).sendFile(targetFile);
     });
   }
 
+  // 5. معالجة المسارات غير الموجودة لطلبات الـ API
+  app.all("/api/*", (req, res) => {
+    res.status(404).json({
+      error: `المسار المطلوب غير موجود في الخادم / The requested API endpoint '${req.path}' was not found.`
+    });
+  });
+
+  // 6. حماية الأخطاء العامة في الخادم (يجب أن تكون في النهاية دائماً)
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error("خطأ عام غير معالج في السيرفر:", err);
+    res.status(res.statusCode === 200 ? 500 : res.statusCode).json({
+      error: err.message || "حدث خطأ غير متوقع في الخادم / An unexpected server error occurred."
+    });
+  });
+
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`تم تشغيل السيرفر المطور بنجاح على الرابط: http://localhost:${PORT}`);
+    console.log(`تم تشغيل السيرفر بنجاح على الرابط: http://localhost:${PORT}`);
   });
 }
 
@@ -3892,3 +3917,4 @@ startServer();
 
 export { app };
 export default app;
+
