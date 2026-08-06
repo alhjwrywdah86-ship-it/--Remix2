@@ -1,10 +1,11 @@
-const CACHE_NAME = 'teacher-app-v9';
+const CACHE_NAME = 'teacher-app-v10';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/pwa-192x192.png',
   '/pwa-512x512.png',
+  '/apple-touch-icon.png',
   '/favicon.ico'
 ];
 
