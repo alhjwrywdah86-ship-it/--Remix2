@@ -25,21 +25,24 @@ jobs:
           java-version: '17'
 
       - name: Install Dependencies
-        run: npm install
-
-      - name: Generate Native App Icons
         run: |
-          npm install -D @capacitor/assets
-          mkdir -p assets
-          cp public/pwa-512x512.png assets/icon-only.png
-          cp public/pwa-512x512.png assets/icon-foreground.png
-          npx capacitor-assets generate --android --iconBackgroundColor '#ffffff' --iconBackgroundColorDark '#0f172a'
+          npm install
+          npm install -D @capacitor/cli @capacitor/assets
+          npm install @capacitor/core @capacitor/android
 
       - name: Build Web App
         run: npm run build
 
-      - name: Sync Capacitor Android
-        run: npx cap sync android
+      - name: Prepare Assets & Setup Android Platform
+        run: |
+          mkdir -p assets
+          cp public/pwa-512x512.png assets/icon-only.png
+          cp public/pwa-512x512.png assets/icon-foreground.png
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+          npx capacitor-assets generate --android --iconBackgroundColor '#ffffff' --iconBackgroundColorDark '#0f172a'
+          npx cap sync android
 
       - name: Build Android APK
         run: |
