@@ -25,10 +25,7 @@ jobs:
           java-version: '17'
 
       - name: Install Dependencies
-        run: |
-          npm install
-          npm install -D @capacitor/cli @capacitor/assets
-          npm install @capacitor/core @capacitor/android
+        run: npm install
 
       - name: Build Web App
         run: npm run build
