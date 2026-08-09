@@ -41,20 +41,23 @@ jobs:
             npx cap add android
           fi
 
-      - name: Apply Approved Project Icon To Android
+      - name: Force Project App Icon
         run: |
-          # البحث عن صورة الأيقونة المعتمدة داخل مجلدات المشروع
+          # تحديد صورة الأيقونة من مجلد public
           ICON_SRC=""
-          for f in public/pwa-512x512.png public/app-icon.png public/pwa-192x192.png public/apple-touch-icon.png assets/icon.png; do
-            if [ -f "$f" ]; then
-              ICON_SRC="$f"
-              break
-            fi
-          done
+          if [ -f "public/app-icon.png" ]; then
+            ICON_SRC="public/app-icon.png"
+          elif [ -f "public/pwa-512x512.png" ]; then
+            ICON_SRC="public/pwa-512x512.png"
+          fi
 
           if [ -n "$ICON_SRC" ]; then
-            echo "Using approved project icon: $ICON_SRC"
-            # استبدال جميع أيقونات أندرويد بالصورة المعتمدة
+            echo "Applying app icon from $ICON_SRC"
+            
+            # 1. حذف مجلد mipmap-anydpi-v26 بالكامل لإلغاء أيقونة أندرويد الخضراء التكيفية
+            rm -rf android/app/src/main/res/mipmap-anydpi-v26
+
+            # 2. استبدال جميع صور الأيقونات في كافة أحجام mipmap بالصورة المعتمدة
             for dir in android/app/src/main/res/mipmap-*; do
               if [ -d "$dir" ]; then
                 cp "$ICON_SRC" "$dir/ic_launcher.png"
@@ -62,10 +65,6 @@ jobs:
                 cp "$ICON_SRC" "$dir/ic_launcher_foreground.png"
               fi
             done
-            
-            # إزالة تعريفات الأيقونة الافتراضية التي تعرض شعار Capacitor
-            rm -rf android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml || true
-            rm -rf android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml || true
           fi
 
       - name: Sync Capacitor
