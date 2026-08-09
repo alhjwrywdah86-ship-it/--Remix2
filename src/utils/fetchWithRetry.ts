@@ -1,3 +1,5 @@
+import { getApiUrl } from './apiConfig';
+
 /**
  * A robust fetch wrapper that implements Exponential Backoff retries
  * for temporary connection issues, 429 (Rate Limit), and 503 (Service Unavailable) status codes.
@@ -11,10 +13,11 @@ export async function fetchWithRetry<T = Response>(
   onRetry?: (attempt: number, delayMs: number, errorMsg: string) => void
 ): Promise<T> {
   let lastError: any = null;
+  const targetUrl = getApiUrl(url);
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const response = await fetch(url, options);
+      const response = await fetch(targetUrl, options);
 
       // Treat rate limiting (429) or service unavailable (503) as transient failures that we should retry
       if (response.status === 429 || response.status === 503) {
