@@ -24,6 +24,9 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Install Dependencies
         run: npm install
 
@@ -48,19 +51,17 @@ jobs:
             cp public/app-icon.png assets/icon.png
             cp public/app-icon.png assets/icon-only.png
             cp public/app-icon.png assets/icon-foreground.png
-          elif [ -f "public/pwa-512x512.png" ]; then
-            cp public/pwa-512x512.png assets/icon.png
-            cp public/pwa-512x512.png assets/icon-only.png
-            cp public/pwa-512x512.png assets/icon-foreground.png
           fi
           npx @capacitor/assets generate --android
 
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build Android APK
+      - name: Repair Gradle Wrapper & Build Android APK
         run: |
           cd android
+          # إعادة توليد Wrapper السليم للتخلص من الملف التالف
+          gradle wrapper
           chmod +x gradlew
           ./gradlew assembleDebug
 
