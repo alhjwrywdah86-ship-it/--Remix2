@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">المعلم العربي المحترف</string>
+    <string name="title_activity_main">المعلم العربي المحترف</string>
+    <string name="package_name">com.teacher.app</string>
+    <string name="custom_url_scheme">com.teacher.app</string>
+</resources>

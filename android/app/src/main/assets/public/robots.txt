@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://remix2-production.up.railway.app/sitemap.xml

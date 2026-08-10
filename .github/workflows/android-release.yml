@@ -46,8 +46,12 @@ jobs:
           mkdir -p assets
           if [ -f "public/app-icon.png" ]; then
             cp public/app-icon.png assets/icon.png
+            cp public/app-icon.png assets/icon-only.png
+            cp public/app-icon.png assets/icon-foreground.png
           elif [ -f "public/pwa-512x512.png" ]; then
             cp public/pwa-512x512.png assets/icon.png
+            cp public/pwa-512x512.png assets/icon-only.png
+            cp public/pwa-512x512.png assets/icon-foreground.png
           fi
           npx @capacitor/assets generate --android
 
