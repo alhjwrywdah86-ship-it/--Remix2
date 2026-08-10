@@ -60,8 +60,8 @@ jobs:
       - name: Repair Gradle Wrapper & Build Android APK
         run: |
           cd android
-          # إعادة توليد Wrapper السليم للتخلص من الملف التالف
-          gradle wrapper
+          # إعادة توليد Wrapper بإصدار Gradle 8.7 المتوافق مع AGP
+          gradle wrapper --gradle-version 8.7
           chmod +x gradlew
           ./gradlew assembleDebug
 
