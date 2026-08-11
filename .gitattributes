@@ -1,10 +1,12 @@
 * text=auto
 
-# Explicitly mark image binary assets to prevent UTF-8 or line-ending conversion in Git/GitHub/Railway
+# Explicitly mark binary assets to prevent UTF-8 or line-ending conversion in Git/GitHub/Railway
 *.png binary
 *.ico binary
 *.jpg binary
 *.jpeg binary
 *.webp binary
 *.gif binary
+*.jar binary
+*.keystore binary
 *.svg text

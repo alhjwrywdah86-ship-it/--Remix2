@@ -57,23 +57,10 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Repair Gradle Wrapper & Build Android APK
+      - name: Build Android APK
         run: |
-          # إنشاء بيئة مؤقتة مع ملف إعدادات أدنى لتوليد Wrapper 8.7
-          mkdir -p /tmp/gradle-wrapper-fix
-          cd /tmp/gradle-wrapper-fix
-          touch settings.gradle
-          gradle wrapper --gradle-version 8.7
-
-          # نقل ملفات الـ Wrapper السليمة إلى مجلد أندرويد بالمشروع
-          cd $GITHUB_WORKSPACE/android
-          mkdir -p gradle/wrapper
-          cp -f /tmp/gradle-wrapper-fix/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/
-          cp -f /tmp/gradle-wrapper-fix/gradle/wrapper/gradle-wrapper.properties gradle/wrapper/
-          cp -f /tmp/gradle-wrapper-fix/gradlew ./
+          cd android
           chmod +x gradlew
-
-          # تشغيل عملية البناء بـ Gradlew المتوافق (8.7)
           ./gradlew assembleDebug
 
       - name: Upload APK Artifact
