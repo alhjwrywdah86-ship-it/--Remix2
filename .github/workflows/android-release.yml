@@ -44,14 +44,52 @@ jobs:
             npx cap add android
           fi
 
-      - name: Generate Official Android Assets
+      - name: Force Overwrite Android Icons Directly
         run: |
-          mkdir -p assets
-          cp public/app-icon.png assets/icon.png
-          cp public/app-icon.png assets/icon-only.png
-          cp public/app-icon.png assets/icon-foreground.png
-          cp public/app-icon.png assets/icon-background.png
-          npx @capacitor/assets generate --android
+          python3 -m pip install pillow
+          python3 - << 'EOF'
+          import os
+          from PIL import Image
+
+          icon_path = 'public/app-icon.png'
+          if not os.path.exists(icon_path):
+              print(f"Error: {icon_path} not found!")
+              exit(1)
+
+          img = Image.open(icon_path).convert('RGBA')
+          res_dir = 'android/app/src/main/res'
+
+          sizes = {
+              'mipmap-mdpi': 48,
+              'mipmap-hdpi': 72,
+              'mipmap-xhdpi': 96,
+              'mipmap-xxhdpi': 144,
+              'mipmap-xxxhdpi': 192
+          }
+
+          fg_sizes = {
+              'mipmap-mdpi': 108,
+              'mipmap-hdpi': 162,
+              'mipmap-xhdpi': 216,
+              'mipmap-xxhdpi': 324,
+              'mipmap-xxxhdpi': 432
+          }
+
+          for folder, size in sizes.items():
+              target_dir = os.path.join(res_dir, folder)
+              os.makedirs(target_dir, exist_ok=True)
+              resized = img.resize((size, size), Image.Resampling.LANCZOS)
+              resized.save(os.path.join(target_dir, 'ic_launcher.png'))
+              resized.save(os.path.join(target_dir, 'ic_launcher_round.png'))
+
+          for folder, size in fg_sizes.items():
+              target_dir = os.path.join(res_dir, folder)
+              os.makedirs(target_dir, exist_ok=True)
+              resized = img.resize((size, size), Image.Resampling.LANCZOS)
+              resized.save(os.path.join(target_dir, 'ic_launcher_foreground.png'))
+
+          print("Successfully updated all Android mipmap icons!")
+          EOF
 
       - name: Sync Capacitor
         run: npx cap sync android
