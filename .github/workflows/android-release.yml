@@ -57,6 +57,11 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Regenerate Valid Gradle Wrapper
+        run: |
+          cd android
+          gradle wrapper --gradle-version 8.7
+
       - name: Build Android APK
         run: |
           cd android
