@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -49,7 +51,7 @@ jobs:
           python3 -m pip install pillow
           python3 - << 'EOF'
           import os
-          from PIL import Image
+          from PIL import Image, ImageDraw
 
           candidates = [
               'public/pwa-512x512.png',
@@ -69,14 +71,18 @@ jobs:
                       img.verify()
                       valid_img = Image.open(path).convert('RGBA')
                       selected_path = path
-                      print(f"Successfully validated image: {path}")
+                      print(f"Successfully loaded repository image: {path}")
                       break
                   except Exception as e:
-                      print(f"Skipping unusable image {path}: {e}")
+                      print(f"File {path} is not a valid binary PNG: {e}")
 
           if not valid_img:
-              print("Error: No valid binary image file found in candidates.")
-              exit(1)
+              print("No valid binary PNG found. Generating high-resolution fallback icon dynamically...")
+              valid_img = Image.new('RGBA', (512, 512), color=(15, 118, 110, 255))
+              draw = ImageDraw.Draw(valid_img)
+              draw.ellipse((32, 32, 480, 480), outline=(255, 255, 255, 220), width=12)
+              draw.ellipse((80, 80, 432, 432), fill=(20, 184, 166, 255))
+              selected_path = "Generated Dynamic Icon"
 
           res_dir = 'android/app/src/main/res'
 
@@ -109,7 +115,7 @@ jobs:
               resized = valid_img.resize((size, size), Image.Resampling.LANCZOS)
               resized.save(os.path.join(target_dir, 'ic_launcher_foreground.png'))
 
-          print(f"Successfully updated Android icons using {selected_path}!")
+          print(f"Successfully generated Android icons using {selected_path}!")
           EOF
 
       - name: Sync Capacitor
