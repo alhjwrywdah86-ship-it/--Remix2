@@ -51,12 +51,33 @@ jobs:
           import os
           from PIL import Image
 
-          icon_path = 'public/app-icon.png'
-          if not os.path.exists(icon_path):
-              print(f"Error: {icon_path} not found!")
+          candidates = [
+              'public/pwa-512x512.png',
+              'public/app-icon.png',
+              'public/pwa-192x192.png',
+              'public/apple-touch-icon.png',
+              'public/og-image.png'
+          ]
+
+          valid_img = None
+          selected_path = None
+
+          for path in candidates:
+              if os.path.exists(path):
+                  try:
+                      img = Image.open(path)
+                      img.verify()
+                      valid_img = Image.open(path).convert('RGBA')
+                      selected_path = path
+                      print(f"Successfully validated image: {path}")
+                      break
+                  except Exception as e:
+                      print(f"Skipping unusable image {path}: {e}")
+
+          if not valid_img:
+              print("Error: No valid binary image file found in candidates.")
               exit(1)
 
-          img = Image.open(icon_path).convert('RGBA')
           res_dir = 'android/app/src/main/res'
 
           sizes = {
@@ -78,17 +99,17 @@ jobs:
           for folder, size in sizes.items():
               target_dir = os.path.join(res_dir, folder)
               os.makedirs(target_dir, exist_ok=True)
-              resized = img.resize((size, size), Image.Resampling.LANCZOS)
+              resized = valid_img.resize((size, size), Image.Resampling.LANCZOS)
               resized.save(os.path.join(target_dir, 'ic_launcher.png'))
               resized.save(os.path.join(target_dir, 'ic_launcher_round.png'))
 
           for folder, size in fg_sizes.items():
               target_dir = os.path.join(res_dir, folder)
               os.makedirs(target_dir, exist_ok=True)
-              resized = img.resize((size, size), Image.Resampling.LANCZOS)
+              resized = valid_img.resize((size, size), Image.Resampling.LANCZOS)
               resized.save(os.path.join(target_dir, 'ic_launcher_foreground.png'))
 
-          print("Successfully updated all Android mipmap icons!")
+          print(f"Successfully updated Android icons using {selected_path}!")
           EOF
 
       - name: Sync Capacitor
