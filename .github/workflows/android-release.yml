@@ -47,11 +47,10 @@ jobs:
       - name: Generate Official Android Assets
         run: |
           mkdir -p assets
-          if [ -f "public/app-icon.png" ]; then
-            cp public/app-icon.png assets/icon.png
-            cp public/app-icon.png assets/icon-only.png
-            cp public/app-icon.png assets/icon-foreground.png
-          fi
+          cp public/app-icon.png assets/icon.png
+          cp public/app-icon.png assets/icon-only.png
+          cp public/app-icon.png assets/icon-foreground.png
+          cp public/app-icon.png assets/icon-background.png
           npx @capacitor/assets generate --android
 
       - name: Sync Capacitor
