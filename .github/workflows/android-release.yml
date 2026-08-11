@@ -59,9 +59,10 @@ jobs:
 
       - name: Repair Gradle Wrapper & Build Android APK
         run: |
-          # توليد Wrapper 8.7 داخل مجلد مؤقت فارغ لتفادي خطأ التوافق مع Gradle 9.6
+          # إنشاء بيئة مؤقتة مع ملف إعدادات أدنى لتوليد Wrapper 8.7
           mkdir -p /tmp/gradle-wrapper-fix
           cd /tmp/gradle-wrapper-fix
+          touch settings.gradle
           gradle wrapper --gradle-version 8.7
 
           # نقل ملفات الـ Wrapper السليمة إلى مجلد أندرويد بالمشروع
@@ -69,9 +70,10 @@ jobs:
           mkdir -p gradle/wrapper
           cp -f /tmp/gradle-wrapper-fix/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/
           cp -f /tmp/gradle-wrapper-fix/gradle/wrapper/gradle-wrapper.properties gradle/wrapper/
-
-          # تشغيل عملية البناء بـ Gradle 8.7 السليم
+          cp -f /tmp/gradle-wrapper-fix/gradlew ./
           chmod +x gradlew
+
+          # تشغيل عملية البناء بـ Gradlew المتوافق (8.7)
           ./gradlew assembleDebug
 
       - name: Upload APK Artifact
