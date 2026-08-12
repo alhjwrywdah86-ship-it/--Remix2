@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -43,6 +45,85 @@ jobs:
           if [ ! -d "android" ]; then
             npx cap add android
           fi
+
+      - name: Force Apply Golden Hat App Icon to Android
+        run: |
+          python3 -m pip install pillow
+          python3 - << 'EOF'
+          import os, glob
+          from PIL import Image
+
+          # البحث عن صورة القبعة الذهبية في المجلدات المتاحة
+          search_paths = [
+              'src/assets/images/app_icon_official_*.jpg',
+              'src/assets/images/app_icon_official_*.png',
+              'public/og-image.png',
+              'src/assets/images/og_image_*.jpg'
+          ]
+
+          candidate_files = []
+          for pattern in search_paths:
+              candidate_files.extend(glob.glob(pattern))
+
+          valid_img = None
+          selected_path = None
+
+          for path in candidate_files:
+              if os.path.exists(path):
+                  try:
+                      img = Image.open(path)
+                      img.verify()
+                      valid_img = Image.open(path).convert('RGBA')
+                      selected_path = path
+                      print(f"Successfully loaded source icon: {path}")
+                      break
+                  except Exception as e:
+                      print(f"Skipping unusable file {path}: {e}")
+
+          if not valid_img:
+              print("Error: No Golden Hat icon source image found.")
+              exit(1)
+
+          # قص مركز الصورة لضمان ملاءمتها لكافة أحجام الأيقونات
+          w, h = valid_img.size
+          crop_size = min(w, h)
+          left = (w - crop_size) // 2
+          top = (h - crop_size) // 2
+          cropped_img = valid_img.crop((left, top, left + crop_size, top + crop_size))
+
+          res_dir = 'android/app/src/main/res'
+
+          sizes = {
+              'mipmap-mdpi': 48,
+              'mipmap-hdpi': 72,
+              'mipmap-xhdpi': 96,
+              'mipmap-xxhdpi': 144,
+              'mipmap-xxxhdpi': 192
+          }
+
+          fg_sizes = {
+              'mipmap-mdpi': 108,
+              'mipmap-hdpi': 162,
+              'mipmap-xhdpi': 216,
+              'mipmap-xxhdpi': 324,
+              'mipmap-xxxhdpi': 432
+          }
+
+          for folder, size in sizes.items():
+              target_dir = os.path.join(res_dir, folder)
+              os.makedirs(target_dir, exist_ok=True)
+              resized = cropped_img.resize((size, size), Image.Resampling.LANCZOS)
+              resized.save(os.path.join(target_dir, 'ic_launcher.png'))
+              resized.save(os.path.join(target_dir, 'ic_launcher_round.png'))
+
+          for folder, size in fg_sizes.items():
+              target_dir = os.path.join(res_dir, folder)
+              os.makedirs(target_dir, exist_ok=True)
+              resized = cropped_img.resize((size, size), Image.Resampling.LANCZOS)
+              resized.save(os.path.join(target_dir, 'ic_launcher_foreground.png'))
+
+          print(f"Successfully generated Android Launcher Icons using {selected_path}!")
+          EOF
 
       - name: Sync Capacitor
         run: npx cap sync android
