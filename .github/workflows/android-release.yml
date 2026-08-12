@@ -46,50 +46,47 @@ jobs:
             npx cap add android
           fi
 
-      - name: Force Apply Golden Hat App Icon & Remove Adaptive XML
+      - name: Force Apply Golden Hat App Icon
         run: |
           python3 -m pip install pillow
           python3 - << 'EOF'
           import os, glob, shutil
           from PIL import Image
 
-          # 1. حذف مجلد Adaptive Icons المتسبب في ظهور اللون الأخضر الافتراضي
+          # 1. حذف مجلد Adaptive Icons لمنع ظهور الأيقونة الخضراء أو القديمة
           adaptive_dir = 'android/app/src/main/res/mipmap-anydpi-v26'
           if os.path.exists(adaptive_dir):
               shutil.rmtree(adaptive_dir)
-              print("Successfully removed mipmap-anydpi-v26 to disable default green Android vector icon.")
 
-          # 2. البحث عن صورة القبعة الذهبية
-          search_paths = [
-              'public/og-image.png',
-              'src/assets/images/og_image_*.jpg',
-              'src/assets/images/app_icon_official_*.jpg'
+          # 2. البحث عن صورة القبعة الذهبية المرفوعة حديثاً حصراً
+          search_patterns = [
+              'public/app-icon.png',
+              'public/golden-hat.png',
+              'public/app-icon.jpg',
+              'public/golden-hat.jpg',
+              'src/assets/images/golden-hat.png'
           ]
 
-          candidate_files = []
-          for pattern in search_paths:
-              candidate_files.extend(glob.glob(pattern))
-
-          valid_img = None
           selected_path = None
+          valid_img = None
 
-          for path in candidate_files:
+          for path in search_patterns:
               if os.path.exists(path):
                   try:
                       img = Image.open(path)
                       img.verify()
                       valid_img = Image.open(path).convert('RGBA')
                       selected_path = path
-                      print(f"Successfully loaded Golden Hat image: {path}")
+                      print(f"Target icon loaded successfully from: {path}")
                       break
                   except Exception as e:
-                      print(f"Skipping file {path}: {e}")
+                      print(f"Skipping unusable image {path}: {e}")
 
           if not valid_img:
-              print("Error: No Golden Hat image found.")
+              print("Error: Golden Hat icon image was not found in public/ or src/assets/")
               exit(1)
 
-          # قص مركز الصورة بشكل مربّع متناسق
+          # قص الصورة لمقاس مربع
           w, h = valid_img.size
           crop_size = min(w, h)
           left = (w - crop_size) // 2
@@ -114,13 +111,13 @@ jobs:
               resized.save(os.path.join(target_dir, 'ic_launcher_round.png'))
               resized.save(os.path.join(target_dir, 'ic_launcher_foreground.png'))
 
-          print("Golden Hat PNG icons generated across all mipmap folders!")
+          print(f"Android app icon generated successfully using: {selected_path}")
           EOF
 
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Fix Gradle Wrapper (Download Clean Binary 8.13)
+      - name: Fix Gradle Wrapper
         run: |
           mkdir -p android/gradle/wrapper
           curl -fSL "https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar" -o android/gradle/wrapper/gradle-wrapper.jar
