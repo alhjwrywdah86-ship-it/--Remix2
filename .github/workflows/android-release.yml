@@ -47,6 +47,20 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Fix Gradle Wrapper (Download Clean Binary 8.13)
+        run: |
+          mkdir -p android/gradle/wrapper
+          curl -fSL "https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar" -o android/gradle/wrapper/gradle-wrapper.jar
+          cat << 'EOF' > android/gradle/wrapper/gradle-wrapper.properties
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-bin.zip
+          networkTimeout=10000
+          validateDistributionUrl=true
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+
       - name: Build Android APK
         run: |
           cd android
