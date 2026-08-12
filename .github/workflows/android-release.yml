@@ -46,19 +46,24 @@ jobs:
             npx cap add android
           fi
 
-      - name: Force Apply Golden Hat App Icon to Android
+      - name: Force Apply Golden Hat App Icon & Remove Adaptive XML
         run: |
           python3 -m pip install pillow
           python3 - << 'EOF'
-          import os, glob
+          import os, glob, shutil
           from PIL import Image
 
-          # البحث عن صورة القبعة الذهبية في المجلدات المتاحة
+          # 1. حذف مجلد Adaptive Icons المتسبب في ظهور اللون الأخضر الافتراضي
+          adaptive_dir = 'android/app/src/main/res/mipmap-anydpi-v26'
+          if os.path.exists(adaptive_dir):
+              shutil.rmtree(adaptive_dir)
+              print("Successfully removed mipmap-anydpi-v26 to disable default green Android vector icon.")
+
+          # 2. البحث عن صورة القبعة الذهبية
           search_paths = [
-              'src/assets/images/app_icon_official_*.jpg',
-              'src/assets/images/app_icon_official_*.png',
               'public/og-image.png',
-              'src/assets/images/og_image_*.jpg'
+              'src/assets/images/og_image_*.jpg',
+              'src/assets/images/app_icon_official_*.jpg'
           ]
 
           candidate_files = []
@@ -75,16 +80,16 @@ jobs:
                       img.verify()
                       valid_img = Image.open(path).convert('RGBA')
                       selected_path = path
-                      print(f"Successfully loaded source icon: {path}")
+                      print(f"Successfully loaded Golden Hat image: {path}")
                       break
                   except Exception as e:
-                      print(f"Skipping unusable file {path}: {e}")
+                      print(f"Skipping file {path}: {e}")
 
           if not valid_img:
-              print("Error: No Golden Hat icon source image found.")
+              print("Error: No Golden Hat image found.")
               exit(1)
 
-          # قص مركز الصورة لضمان ملاءمتها لكافة أحجام الأيقونات
+          # قص مركز الصورة بشكل مربّع متناسق
           w, h = valid_img.size
           crop_size = min(w, h)
           left = (w - crop_size) // 2
@@ -101,28 +106,15 @@ jobs:
               'mipmap-xxxhdpi': 192
           }
 
-          fg_sizes = {
-              'mipmap-mdpi': 108,
-              'mipmap-hdpi': 162,
-              'mipmap-xhdpi': 216,
-              'mipmap-xxhdpi': 324,
-              'mipmap-xxxhdpi': 432
-          }
-
           for folder, size in sizes.items():
               target_dir = os.path.join(res_dir, folder)
               os.makedirs(target_dir, exist_ok=True)
               resized = cropped_img.resize((size, size), Image.Resampling.LANCZOS)
               resized.save(os.path.join(target_dir, 'ic_launcher.png'))
               resized.save(os.path.join(target_dir, 'ic_launcher_round.png'))
-
-          for folder, size in fg_sizes.items():
-              target_dir = os.path.join(res_dir, folder)
-              os.makedirs(target_dir, exist_ok=True)
-              resized = cropped_img.resize((size, size), Image.Resampling.LANCZOS)
               resized.save(os.path.join(target_dir, 'ic_launcher_foreground.png'))
 
-          print(f"Successfully generated Android Launcher Icons using {selected_path}!")
+          print("Golden Hat PNG icons generated across all mipmap folders!")
           EOF
 
       - name: Sync Capacitor
