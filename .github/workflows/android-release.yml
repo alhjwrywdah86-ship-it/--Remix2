@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          lfs: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -46,90 +44,8 @@ jobs:
             npx cap add android
           fi
 
-      - name: Force Apply Golden Hat App Icon
-        run: |
-          python3 -m pip install pillow
-          python3 - << 'EOF'
-          import os, glob, shutil
-          from PIL import Image
-
-          # 1. حذف مجلد Adaptive Icons لمنع ظهور الأيقونة الخضراء أو القديمة
-          adaptive_dir = 'android/app/src/main/res/mipmap-anydpi-v26'
-          if os.path.exists(adaptive_dir):
-              shutil.rmtree(adaptive_dir)
-
-          # 2. البحث عن صورة القبعة الذهبية المرفوعة حديثاً حصراً
-          search_patterns = [
-              'public/app-icon.png',
-              'public/golden-hat.png',
-              'public/app-icon.jpg',
-              'public/golden-hat.jpg',
-              'src/assets/images/golden-hat.png'
-          ]
-
-          selected_path = None
-          valid_img = None
-
-          for path in search_patterns:
-              if os.path.exists(path):
-                  try:
-                      img = Image.open(path)
-                      img.verify()
-                      valid_img = Image.open(path).convert('RGBA')
-                      selected_path = path
-                      print(f"Target icon loaded successfully from: {path}")
-                      break
-                  except Exception as e:
-                      print(f"Skipping unusable image {path}: {e}")
-
-          if not valid_img:
-              print("Error: Golden Hat icon image was not found in public/ or src/assets/")
-              exit(1)
-
-          # قص الصورة لمقاس مربع
-          w, h = valid_img.size
-          crop_size = min(w, h)
-          left = (w - crop_size) // 2
-          top = (h - crop_size) // 2
-          cropped_img = valid_img.crop((left, top, left + crop_size, top + crop_size))
-
-          res_dir = 'android/app/src/main/res'
-
-          sizes = {
-              'mipmap-mdpi': 48,
-              'mipmap-hdpi': 72,
-              'mipmap-xhdpi': 96,
-              'mipmap-xxhdpi': 144,
-              'mipmap-xxxhdpi': 192
-          }
-
-          for folder, size in sizes.items():
-              target_dir = os.path.join(res_dir, folder)
-              os.makedirs(target_dir, exist_ok=True)
-              resized = cropped_img.resize((size, size), Image.Resampling.LANCZOS)
-              resized.save(os.path.join(target_dir, 'ic_launcher.png'))
-              resized.save(os.path.join(target_dir, 'ic_launcher_round.png'))
-              resized.save(os.path.join(target_dir, 'ic_launcher_foreground.png'))
-
-          print(f"Android app icon generated successfully using: {selected_path}")
-          EOF
-
       - name: Sync Capacitor
         run: npx cap sync android
-
-      - name: Fix Gradle Wrapper
-        run: |
-          mkdir -p android/gradle/wrapper
-          curl -fSL "https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar" -o android/gradle/wrapper/gradle-wrapper.jar
-          cat << 'EOF' > android/gradle/wrapper/gradle-wrapper.properties
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-bin.zip
-          networkTimeout=10000
-          validateDistributionUrl=true
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          EOF
 
       - name: Build Android APK
         run: |
