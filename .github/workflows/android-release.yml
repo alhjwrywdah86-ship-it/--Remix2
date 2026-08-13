@@ -53,26 +53,30 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Auto Prepare App Icons
+      - name: Auto Locate and Prepare App Icon
         run: |
-          mkdir -p resources
-          FOUND_ICON=""
-          for f in public/app-icon-512.png app-icon-512.png public/icon.png assets/icon.png; do
-            if [ -f "$f" ]; then
-              FOUND_ICON="$f"
-              break
-            fi
-          done
-          
-          if [ -n "$FOUND_ICON" ]; then
-            echo "Using source icon: $FOUND_ICON"
-            cp "$FOUND_ICON" resources/icon.png
-            cp "$FOUND_ICON" resources/icon-only.png
-            cp "$FOUND_ICON" resources/icon-foreground.png
+          echo "Searching for app-icon-512..."
+          FOUND_ICON=$(find . -iname "*app-icon-512*" -o -iname "*app-icon*" | head -n 1)
+
+          if [ -z "$FOUND_ICON" ]; then
+            echo "::error::Could not find app-icon-512.png anywhere in the repository!"
+            exit 1
           fi
 
+          echo "Found target icon at: $FOUND_ICON"
+
+          mkdir -p assets resources
+          cp "$FOUND_ICON" assets/icon-only.png
+          cp "$FOUND_ICON" assets/icon-foreground.png
+          cp "$FOUND_ICON" assets/icon.png
+          cp "$FOUND_ICON" assets/logo.png
+
+          cp "$FOUND_ICON" resources/icon-only.png
+          cp "$FOUND_ICON" resources/icon-foreground.png
+          cp "$FOUND_ICON" resources/icon.png
+
       - name: Generate App Icons
-        run: npx --yes @capacitor/assets generate --android --iconBackgroundColor "#021636" --iconBackgroundColorDark "#021636"
+        run: npx --yes @capacitor/assets generate --android --assetPath assets --iconBackgroundColor "#021636" --iconBackgroundColorDark "#021636"
 
       - name: Setup Gradle Wrapper Files
         run: |
