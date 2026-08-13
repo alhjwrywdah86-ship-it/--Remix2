@@ -56,6 +56,11 @@ jobs:
       - name: Generate App Icons
         run: npx --yes @capacitor/assets generate --android
 
+      - name: Download Missing Gradle Wrapper
+        run: |
+          mkdir -p android/gradle/wrapper
+          curl -fSL "https://raw.githubusercontent.com/gradle/gradle/v8.5/gradle/wrapper/gradle-wrapper.jar" -o android/gradle/wrapper/gradle-wrapper.jar
+
       - name: Build Android APK
         run: |
           cd android
