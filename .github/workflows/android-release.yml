@@ -53,8 +53,26 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Auto Prepare App Icons
+        run: |
+          mkdir -p resources
+          FOUND_ICON=""
+          for f in public/app-icon-512.png app-icon-512.png public/icon.png assets/icon.png; do
+            if [ -f "$f" ]; then
+              FOUND_ICON="$f"
+              break
+            fi
+          done
+          
+          if [ -n "$FOUND_ICON" ]; then
+            echo "Using source icon: $FOUND_ICON"
+            cp "$FOUND_ICON" resources/icon.png
+            cp "$FOUND_ICON" resources/icon-only.png
+            cp "$FOUND_ICON" resources/icon-foreground.png
+          fi
+
       - name: Generate App Icons
-        run: npx --yes @capacitor/assets generate --android
+        run: npx --yes @capacitor/assets generate --android --iconBackgroundColor "#021636" --iconBackgroundColorDark "#021636"
 
       - name: Setup Gradle Wrapper Files
         run: |
