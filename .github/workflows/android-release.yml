@@ -55,12 +55,24 @@ jobs:
 
       - name: Force Direct Icon Replacement
         run: |
-          FOUND_ICON=$(find . -iname "*app-icon-512*" -o -iname "*app-icon*" | head -n 1)
+          FOUND_ICON=""
+          for f in "app-icon-512.png" "public/app-icon-512.png" "assets/app-icon-512.png"; do
+            if [ -f "$f" ]; then
+              FOUND_ICON="$f"
+              break
+            fi
+          done
+
           if [ -z "$FOUND_ICON" ]; then
-            echo "::error::Could not find app-icon-512.png!"
+            FOUND_ICON=$(find . -not -path "*/android*" -iname "*app-icon-512*.png" -o -not -path "*/android*" -iname "*app-icon*.png" | head -n 1)
+          fi
+
+          if [ -z "$FOUND_ICON" ]; then
+            echo "::error::Could not find a valid source icon file!"
             exit 1
           fi
-          echo "Found source icon at: $FOUND_ICON"
+
+          echo "Found clean source icon at: $FOUND_ICON"
 
           sudo apt-get update && sudo apt-get install -y imagemagick
 
