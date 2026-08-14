@@ -53,34 +53,34 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Setup Target App Icon
+      - name: Auto-Trim Transparent Margins & Setup App Icon
         run: |
-          node -e '
-          const fs = require("fs");
+          python3 -m pip install Pillow --quiet
+          python3 -c "
+          from PIL import Image
+          import os
 
-          const targetIcon = "public/app-icon-512.png";
-          const fallbackIcon = "public/pwa-512x512.png";
+          target_icon = 'public/app-icon-512.png'
+          fallback_icon = 'public/pwa-512x512.png'
+          icon_path = target_icon if os.path.exists(target_icon) else fallback_icon
 
-          let selectedIcon = null;
+          print(f'Processing icon from: {icon_path}')
+          img = Image.open(icon_path).convert('RGBA')
 
-          if (fs.existsSync(targetIcon)) {
-            selectedIcon = targetIcon;
-          } else if (fs.existsSync(fallbackIcon)) {
-            selectedIcon = fallbackIcon;
-          }
+          # Auto-crop transparent boundaries
+          bbox = img.getbbox()
+          if bbox:
+              img = img.crop(bbox)
 
-          if (!selectedIcon) {
-            console.error("::error::Target icon file not found!");
-            process.exit(1);
-          }
+          # Resize to perfect 512x512
+          img = img.resize((512, 512), Image.Resampling.LANCZOS)
 
-          console.log("Successfully targeting app icon from:", selectedIcon);
-
-          fs.mkdirSync("assets", { recursive: true });
-          fs.copyFileSync(selectedIcon, "assets/icon.png");
-          fs.copyFileSync(selectedIcon, "assets/icon-only.png");
-          fs.copyFileSync(selectedIcon, "assets/icon-foreground.png");
-          '
+          os.makedirs('assets', exist_ok=True)
+          img.save('assets/icon.png')
+          img.save('assets/icon-only.png')
+          img.save('assets/icon-foreground.png')
+          print('Successfully auto-trimmed and prepared icon!')
+          "
 
       - name: Generate App Icons
         run: npx --yes @capacitor/assets generate --android --assetPath assets --iconBackgroundColor "#021636" --iconBackgroundColorDark "#021636"
