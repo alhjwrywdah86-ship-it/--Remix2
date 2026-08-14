@@ -53,67 +53,34 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Smart Validate and Setup App Icon
+      - name: Setup Target App Icon
         run: |
           node -e '
           const fs = require("fs");
-          const path = require("path");
 
-          function getFiles(dir) {
-            let results = [];
-            const list = fs.readdirSync(dir);
-            list.forEach(file => {
-              if (["node_modules", "android", ".git", "dist", "build"].includes(file)) return;
-              const fullPath = path.join(dir, file);
-              const stat = fs.statSync(fullPath);
-              if (stat && stat.isDirectory()) {
-                results = results.concat(getFiles(fullPath));
-              } else {
-                results.push({ path: fullPath, size: stat.size });
-              }
-            });
-            return results;
+          // Target exact file uploaded by Waddah
+          const targetIcon = "public/app-icon-512.png";
+          const fallbackIcon = "public/pwa-512x512.png";
+
+          let selectedIcon = null;
+
+          if (fs.existsSync(targetIcon)) {
+            selectedIcon = targetIcon;
+          } else if (fs.existsSync(fallbackIcon)) {
+            selectedIcon = fallbackIcon;
           }
 
-          console.log("Searching repository for image files...");
-          const allFiles = getFiles(".");
-          
-          const imageFiles = allFiles.filter(f => {
-            const ext = path.extname(f.path).toLowerCase();
-            return (ext === ".png" || ext === ".jpg" || ext === ".jpeg" || ext === ".webp") && f.size > 1000;
-          });
+          if (!selectedIcon) {
+            console.error("::error::Target icon file not found!");
+            process.exit(1);
+          }
 
-          console.log("Image files found (>1KB):", imageFiles.map(i => `${i.path} (${i.size}B)`));
-
-          imageFiles.sort((a, b) => {
-            const nameA = path.basename(a.path).toLowerCase();
-            const nameB = path.basename(b.path).toLowerCase();
-            if (nameA.includes("512") && !nameB.includes("512")) return -1;
-            if (!nameA.includes("512") && nameB.includes("512")) return 1;
-            if (nameA.includes("app-icon") && !nameB.includes("app-icon")) return -1;
-            if (!nameA.includes("app-icon") && nameB.includes("app-icon")) return 1;
-            if (nameA.includes("icon") && !nameB.includes("icon")) return -1;
-            if (!nameA.includes("icon") && nameB.includes("icon")) return 1;
-            return b.size - a.size;
-          });
+          console.log("Successfully targeting app icon from:", selectedIcon);
 
           fs.mkdirSync("assets", { recursive: true });
-
-          let selectedPath = null;
-          if (imageFiles.length > 0) {
-            selectedPath = imageFiles[0].path;
-            console.log("Selected best icon source:", selectedPath);
-            fs.copyFileSync(selectedPath, "assets/icon.png");
-            fs.copyFileSync(selectedPath, "assets/icon-only.png");
-            fs.copyFileSync(selectedPath, "assets/icon-foreground.png");
-          } else {
-            console.log("No custom image found. Creating fallback clean PNG icon...");
-            const fallbackHex = "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000a49444154789c63000100000500010d0a2db40000000049454e44ae426082";
-            const buffer = Buffer.from(fallbackHex, "hex");
-            fs.writeFileSync("assets/icon.png", buffer);
-            fs.writeFileSync("assets/icon-only.png", buffer);
-            fs.writeFileSync("assets/icon-foreground.png", buffer);
-          }
+          fs.copyFileSync(selectedIcon, "assets/icon.png");
+          fs.copyFileSync(selectedIcon, "assets/icon-only.png");
+          fs.copyFileSync(selectedIcon, "assets/icon-foreground.png");
           '
 
       - name: Generate App Icons
