@@ -58,7 +58,6 @@ jobs:
           node -e '
           const fs = require("fs");
 
-          // Target exact file uploaded by Waddah
           const targetIcon = "public/app-icon-512.png";
           const fallbackIcon = "public/pwa-512x512.png";
 
