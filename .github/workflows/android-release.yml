@@ -53,54 +53,64 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Force Direct Icon Replacement
+      - name: Smart Validate and Setup App Icon
         run: |
-          FOUND_ICON=""
-          for f in "app-icon-512.png" "public/app-icon-512.png" "assets/app-icon-512.png"; do
-            if [ -f "$f" ]; then
-              FOUND_ICON="$f"
-              break
-            fi
-          done
+          node -e '
+          const fs = require("fs");
+          const path = require("path");
 
-          if [ -z "$FOUND_ICON" ]; then
-            FOUND_ICON=$(find . -not -path "*/android*" -iname "*app-icon-512*.png" -o -not -path "*/android*" -iname "*app-icon*.png" | head -n 1)
-          fi
+          function isValidPng(filePath) {
+            try {
+              const buf = Buffer.alloc(8);
+              const fd = fs.openSync(filePath, "r");
+              fs.readSync(fd, buf, 0, 8, 0);
+              fs.closeSync(fd);
+              return buf.toString("hex") === "89504e470d0a1a0a";
+            } catch (e) {
+              return false;
+            }
+          }
 
-          if [ -z "$FOUND_ICON" ]; then
-            echo "::error::Could not find a valid source icon file!"
-            exit 1
-          fi
+          function findValidIcon(dir) {
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            let bestMatch = null;
 
-          echo "Found clean source icon at: $FOUND_ICON"
+            for (const entry of entries) {
+              const fullPath = path.join(dir, entry.name);
+              if (["node_modules", "android", ".git", "dist"].includes(entry.name)) continue;
 
-          sudo apt-get update && sudo apt-get install -y imagemagick
+              if (entry.isDirectory()) {
+                const found = findValidIcon(fullPath);
+                if (found) return found;
+              } else if (entry.isFile()) {
+                const lower = entry.name.toLowerCase();
+                if (lower.includes("app-icon-512") && isValidPng(fullPath)) {
+                  return fullPath; // Priority 1: Exact target icon
+                }
+                if (lower.includes("icon") && isValidPng(fullPath)) {
+                  bestMatch = fullPath;
+                }
+              }
+            }
+            return bestMatch;
+          }
 
-          RES_DIR="android/app/src/main/res"
-          mkdir -p $RES_DIR/mipmap-mdpi $RES_DIR/mipmap-hdpi $RES_DIR/mipmap-xhdpi $RES_DIR/mipmap-xxhdpi $RES_DIR/mipmap-xxxhdpi
+          const iconPath = findValidIcon(".");
+          if (!iconPath) {
+            console.error("::error::No valid PNG icon found!");
+            process.exit(1);
+          }
 
-          # Replace all legacy and round icons
-          convert "$FOUND_ICON" -resize 48x48 $RES_DIR/mipmap-mdpi/ic_launcher.png
-          convert "$FOUND_ICON" -resize 72x72 $RES_DIR/mipmap-hdpi/ic_launcher.png
-          convert "$FOUND_ICON" -resize 96x96 $RES_DIR/mipmap-xhdpi/ic_launcher.png
-          convert "$FOUND_ICON" -resize 144x144 $RES_DIR/mipmap-xxhdpi/ic_launcher.png
-          convert "$FOUND_ICON" -resize 192x192 $RES_DIR/mipmap-xxxhdpi/ic_launcher.png
+          console.log("Found valid clean icon at:", iconPath);
 
-          convert "$FOUND_ICON" -resize 48x48 $RES_DIR/mipmap-mdpi/ic_launcher_round.png
-          convert "$FOUND_ICON" -resize 72x72 $RES_DIR/mipmap-hdpi/ic_launcher_round.png
-          convert "$FOUND_ICON" -resize 96x96 $RES_DIR/mipmap-xhdpi/ic_launcher_round.png
-          convert "$FOUND_ICON" -resize 144x144 $RES_DIR/mipmap-xxhdpi/ic_launcher_round.png
-          convert "$FOUND_ICON" -resize 192x192 $RES_DIR/mipmap-xxxhdpi/ic_launcher_round.png
+          fs.mkdirSync("assets", { recursive: true });
+          fs.copyFileSync(iconPath, "assets/icon-only.png");
+          fs.copyFileSync(iconPath, "assets/icon-foreground.png");
+          fs.copyFileSync(iconPath, "assets/icon.png");
+          '
 
-          convert "$FOUND_ICON" -resize 108x108 $RES_DIR/mipmap-mdpi/ic_launcher_foreground.png
-          convert "$FOUND_ICON" -resize 162x162 $RES_DIR/mipmap-hdpi/ic_launcher_foreground.png
-          convert "$FOUND_ICON" -resize 216x216 $RES_DIR/mipmap-xhdpi/ic_launcher_foreground.png
-          convert "$FOUND_ICON" -resize 324x324 $RES_DIR/mipmap-xxhdpi/ic_launcher_foreground.png
-          convert "$FOUND_ICON" -resize 432x432 $RES_DIR/mipmap-xxxhdpi/ic_launcher_foreground.png
-
-          # Delete XML vector icon overrides to force PNG icon usage
-          find $RES_DIR -name "ic_launcher.xml" -delete || true
-          find $RES_DIR -name "ic_launcher_round.xml" -delete || true
+      - name: Generate App Icons
+        run: npx --yes @capacitor/assets generate --android --assetPath assets --iconBackgroundColor "#021636" --iconBackgroundColorDark "#021636"
 
       - name: Setup Gradle Wrapper Files
         run: |
