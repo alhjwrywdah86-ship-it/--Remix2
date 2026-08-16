@@ -317,7 +317,7 @@ export default function App() {
           </div>
 
           {/* Sidebar Navigation - Role Aware */}
-          <nav className="flex-1 py-6 px-4 space-y-1.5">
+          <nav className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto">
             <p className="text-[10px] font-mono text-white/40 px-3 pb-2 uppercase tracking-widest">
               {currentRole === "teacher"
                 ? (isAr ? "أدوات المعلم والمتابعة" : "Teacher Tools")
@@ -552,7 +552,7 @@ export default function App() {
 
                 <div className="pt-2 border-t border-white/10 space-y-1">
                   <p className="text-[9px] font-mono text-[#C5A021] px-3 pb-1 uppercase tracking-wider font-bold">
-                    {isAr ? "المنظومة العالمية والمجتمع (المرحلة 8)" : "Global Platform & Community"}
+                    {isAr ? "المنظومة العالمية والمجتمع" : "Global Platform & Community"}
                   </p>
 
                   <button
@@ -606,7 +606,7 @@ export default function App() {
 
                 <div className="pt-2 border-t border-white/10 space-y-1">
                   <p className="text-[9px] font-mono text-[#C5A021] px-3 pb-1 uppercase tracking-wider font-bold">
-                    {isAr ? "أدوات الذكاء الاصطناعي المتقدمة (Phase 6)" : "AI Advanced Tools"}
+                    {isAr ? "أدوات الذكاء الاصطناعي المتقدمة" : "AI Advanced Tools"}
                   </p>
 
                   <button
@@ -637,6 +637,18 @@ export default function App() {
             {currentRole === "student" && (
               <>
                 <button
+                  onClick={() => navigateToTab("student_portal")}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
+                    activeTab === "student_portal"
+                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <GraduationCap className="w-4 h-4 flex-shrink-0 text-emerald-400" />
+                  <span>{isAr ? "بوابة الطالب الرئيسية" : "Student Portal"}</span>
+                </button>
+
+                <button
                   onClick={() => navigateToTab("online_quizzes")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
                     activeTab === "online_quizzes"
@@ -645,7 +657,7 @@ export default function App() {
                   }`}
                 >
                   <FileCheck2 className="w-4 h-4 flex-shrink-0 text-[#C5A021]" />
-                  <span>{isAr ? "الاختبارات الإلكترونية والتصحيح" : "Online Quizzes"}</span>
+                  <span>{isAr ? "الاختبارات والتصحيح" : "Online Quizzes"}</span>
                 </button>
 
                 <button
@@ -659,11 +671,35 @@ export default function App() {
                   <Sparkles className="w-4 h-4 flex-shrink-0 text-amber-300" />
                   <span>{isAr ? "دليلي للتفوق والمراجعة" : "My Study Guide"}</span>
                 </button>
+
+                <button
+                  onClick={() => navigateToTab("gamification")}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
+                    activeTab === "gamification"
+                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <AwardIcon className="w-4 h-4 flex-shrink-0 text-amber-300" />
+                  <span>{isAr ? "شاراتي وأوسمتي" : "Badges & Achievements"}</span>
+                </button>
               </>
             )}
 
-            {currentRole === "supervisor" && (
+            {(currentRole === "supervisor" || currentRole === "admin") && (
               <>
+                <button
+                  onClick={() => navigateToTab("admin_dashboard")}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
+                    activeTab === "admin_dashboard"
+                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <Shield className="w-4 h-4 flex-shrink-0 text-purple-300" />
+                  <span>{isAr ? "لوحة الإدارة والمتابعة" : "Admin Dashboard"}</span>
+                </button>
+
                 <button
                   onClick={() => navigateToTab("smart_analytics")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
@@ -673,19 +709,7 @@ export default function App() {
                   }`}
                 >
                   <BarChart3 className="w-4 h-4 flex-shrink-0 text-purple-300" />
-                  <span>{isAr ? "تقارير المنصة والمتابعة" : "Platform Analytics"}</span>
-                </button>
-
-                <button
-                  onClick={() => navigateToTab("classrooms")}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                    activeTab === "classrooms"
-                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <Users className="w-4 h-4 flex-shrink-0 text-amber-300" />
-                  <span>{isAr ? "الإشراف على الفصول" : "Classrooms Oversight"}</span>
+                  <span>{isAr ? "تحليلات الأداء الشاملة" : "Comprehensive Analytics"}</span>
                 </button>
 
                 <button
@@ -699,651 +723,281 @@ export default function App() {
                   <BookOpen className="w-4 h-4 flex-shrink-0 text-[#C5A021]" />
                   <span>{isAr ? "المكتبة المنهجية" : "Curriculum Library"}</span>
                 </button>
+              </>
+            )}
 
+            {currentRole === "parent" && (
+              <>
                 <button
-                  onClick={() => navigateToTab("admin")}
+                  onClick={() => navigateToTab("parent_portal")}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                    activeTab === "admin"
+                    activeTab === "parent_portal"
                       ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
                       : "text-slate-300 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <Database className="w-4 h-4 flex-shrink-0" />
-                  <span>{isAr ? "إدارة المناهج والملفات" : "Admin Panel"}</span>
+                  <Users className="w-4 h-4 flex-shrink-0 text-[#C5A021]" />
+                  <span>{isAr ? "بوابة ولي الأمر" : "Parent Portal"}</span>
+                </button>
+
+                <button
+                  onClick={() => navigateToTab("messaging")}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
+                    activeTab === "messaging"
+                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <HelpCircle className="w-4 h-4 flex-shrink-0 text-blue-300" />
+                  <span>{isAr ? "الرسائل والإشعارات" : "Messaging & Alerts"}</span>
                 </button>
               </>
             )}
+          </nav>
 
-            <p className="text-[10px] font-mono text-white/40 px-3 pt-4 pb-2 uppercase tracking-widest">
-              {isAr ? "نظام SaaS والخدمات" : "COMMERCIAL SAAS"}
-            </p>
-
+          {/* Sidebar Footer Controls */}
+          <div className="p-4 border-t border-white/10 bg-[#122846]/60 space-y-2">
             <button
               onClick={() => {
                 setShowSubscriptionModal(true);
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-between p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer bg-gradient-to-r from-amber-500/20 to-amber-600/10 border border-[#C5A021]/30 text-amber-200 hover:text-white hover:border-[#C5A021]"
+              className="w-full flex items-center justify-between p-2.5 bg-gradient-to-r from-[#C5A021]/20 to-amber-500/10 hover:from-[#C5A021]/30 hover:to-amber-500/20 border border-[#C5A021]/40 rounded-lg text-xs font-mono text-[#C5A021] font-bold transition-all cursor-pointer"
             >
-              <div className="flex items-center gap-2.5">
-                <Zap className="w-4 h-4 text-[#C5A021]" />
-                <span className="font-bold">{isAr ? "الاشتراكات والترقية" : "SaaS Plans"}</span>
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-amber-400" />
+                <span>{isAr ? "الاشتراك المتقدم" : "Pro Plan"}</span>
               </div>
-              <span className="text-[9px] bg-[#C5A021] text-[#1A365D] font-bold px-1.5 py-0.2 rounded uppercase">
-                {userSubscription.tier === "pro_teacher" ? (isAr ? "معلم محترف" : "Pro Teacher") : userSubscription.tier}
-              </span>
+              <span className="text-[10px] bg-[#C5A021] text-[#1A365D] px-1.5 py-0.5 rounded font-bold">PRO</span>
             </button>
 
-            <button
-              onClick={() => {
-                setShowBackupModal(true);
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white"
-            >
-              <HardDrive className="w-4 h-4 flex-shrink-0 text-emerald-400" />
-              <span>{isAr ? "النسخ الاحتياطي للأرقام" : "Data Backup"}</span>
-            </button>
+            <div className="flex items-center justify-between pt-1">
+              <button
+                onClick={() => {
+                  setShowLegalModal(true);
+                  setLegalTab("about");
+                  setMobileMenuOpen(false);
+                }}
+                className="text-[11px] font-mono text-slate-400 hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <Info className="w-3.5 h-3.5" />
+                <span>{isAr ? "عن المنصة" : "About"}</span>
+              </button>
 
-            <button
-              onClick={() => {
-                setLegalTab("about");
-                setShowLegalModal(true);
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white"
-            >
-              <Shield className="w-4 h-4 flex-shrink-0 text-blue-300" />
-              <span>{isAr ? "الشروط والخصوصية" : "Privacy & Terms"}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setShowLanding(true);
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer text-slate-300 hover:bg-white/5 hover:text-white"
-            >
-              <Home className="w-4 h-4 flex-shrink-0 text-purple-300" />
-              <span>{isAr ? "الصفحة التعريفية" : "Landing Page"}</span>
-            </button>
-
-            <p className="text-[10px] font-mono text-white/40 px-3 pt-4 pb-2 uppercase tracking-widest">
-              {isAr ? "المؤسس والرؤية" : "FOUNDER & PHILOSOPHY"}
-            </p>
-
-            <button
-              onClick={() => navigateToTab("about")}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                activeTab === "about"
-                  ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                  : "text-slate-300 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <Info className="w-4 h-4 flex-shrink-0" />
-              <span>{isAr ? "فلسفة وضاح الزليل" : "Philosophy & Bio"}</span>
-            </button>
-          </nav>
-
-          {/* Profile Card at bottom of Sidebar */}
-          <div className="p-4 border-t border-[#C5A021]/20 bg-[#122846] text-xs font-mono">
-            <div className="flex items-center gap-3 mb-3">
-              <WaddahAvatarSymbol className="w-10 h-10" />
-              <div className="flex-1 min-w-0">
-                <p className="font-bold truncate text-[#C5A021] font-serif">
-                  {isAr ? "أ. وضاح الزليل" : "Waddah Al-Zulil"}
-                </p>
-                <p className="text-[10px] text-slate-400 truncate uppercase tracking-tight">
-                  {isAr ? "وضاح للنشر الرقمي" : "Waddah Pub © 2026"}
-                </p>
-              </div>
+              <button
+                onClick={() => {
+                  setShowBackupModal(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="text-[11px] font-mono text-slate-400 hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <HardDrive className="w-3.5 h-3.5" />
+                <span>{isAr ? "النسخ الاحتياطي" : "Backup"}</span>
+              </button>
             </div>
-            <p className="text-[9px] leading-relaxed text-slate-400/90 text-center border-t border-slate-700/50 pt-3 italic">
-              {isAr
-                ? "العودة للحضور الملموس والواقعية في التربية والتدريس"
-                : "Return to real tangible presence in education"}
-            </p>
           </div>
         </aside>
 
         {/* 2. MAIN CONTENT AREA */}
-        <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-6">
-          
-          {/* Top Ticker - Editorial Notice */}
-          <div className="bg-[#122846] text-slate-100 text-[11px] py-2 px-6 border-b border-[#C5A021]/20 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono shadow-sm">
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-[#C5A021] animate-pulse"></span>
-              <span className="text-[#C5A021] font-bold">
-                {isAr ? "منصة التعليم الرقمية الذكية (المرحلة 4):" : "EdTech Platform (Phase 4):"}
-              </span>
-              <span className="text-slate-300">
-                {isAr
-                  ? "تفعيل أنظمة الفصول الدراسية، الاختبارات والتصحيح الآلي، والتوصيات البيداغوجية بنجاح."
-                  : "Classroom rosters, online timed quizzes, and AI remedial plans fully active."}
-              </span>
-            </div>
-            <div className="flex items-center gap-3 text-[10px] text-slate-400">
-              <span>{isAr ? "الملكية الفكرية: وضاح أحمد الزليل" : "Proprietorship: Waddah Al-Zulil"}</span>
-              <span className="hidden md:inline">|</span>
-              <span className="hidden md:inline">2026</span>
-            </div>
+        <main className="flex-1 flex flex-col min-w-0 bg-[#F8FAFC]">
+          {/* Offline Status Banner */}
+          <OfflineStatusBanner lang={lang} />
+
+          <div ref={contentRef} className="flex-1 p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+            {/* TAB CONTENT SWITCHER */}
+            {activeTab === "dashboard" && (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-[#1A365D] to-[#122846] rounded-2xl p-6 text-white border border-[#C5A021]/30 shadow-xl relative overflow-hidden">
+                  <div className="absolute top-0 end-0 transform translate-x-8 -translate-y-8 w-48 h-48 bg-[#C5A021]/10 rounded-full blur-2xl pointer-events-none" />
+                  <div className="relative z-10 space-y-3">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#C5A021]/20 border border-[#C5A021]/40 rounded-full text-xs font-mono text-[#C5A021]">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{isAr ? "منصة المعلم العربي المحترف" : "Pro Teacher AI Engine"}</span>
+                    </div>
+                    <h1 className="text-2xl md:text-3xl font-serif font-bold text-white">
+                      {isAr
+                        ? `مرحباً بك، ${teacherProfile?.fullName || "المعلم الفاضل"}`
+                        : `Welcome, ${teacherProfile?.fullName || "Distinguished Teacher"}`}
+                    </h1>
+                    <p className="text-sm text-slate-300 max-w-2xl font-mono leading-relaxed">
+                      {isAr
+                        ? "منظومتك الشاملة للتحضير التربوي، إدارة الفصول، إنشاء الاختبارات العادية والإلكترونية، وتحليل نتائج الطلاب بدقة متناهية."
+                        : "Your all-in-one smart system for lesson planning, classroom management, online quizzes, and intelligent analytics."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quick Access Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <button
+                    onClick={() => navigateToTab("curriculum_library")}
+                    className="p-5 bg-white border border-slate-200 hover:border-[#C5A021] rounded-xl shadow-xs hover:shadow-md transition-all text-start group cursor-pointer"
+                  >
+                    <div className="w-10 h-10 bg-amber-500/10 text-[#C5A021] rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-serif font-bold text-[#1A365D] text-base mb-1">
+                      {isAr ? "المكتبة المنهجية" : "Curriculum Library"}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-mono">
+                      {isAr ? "المناهج الجاهزة ومخرجات التعلم" : "Ready-made regional curricula"}
+                    </p>
+                  </button>
+
+                  <button
+                    onClick={() => navigateToTab("planner")}
+                    className="p-5 bg-white border border-slate-200 hover:border-[#C5A021] rounded-xl shadow-xs hover:shadow-md transition-all text-start group cursor-pointer"
+                  >
+                    <div className="w-10 h-10 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-serif font-bold text-[#1A365D] text-base mb-1">
+                      {isAr ? "تخطيط الدروس" : "Lesson Planner"}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-mono">
+                      {isAr ? "إعداد خطط الدروس بالذكاء الاصطناعي" : "AI-driven lesson plan creation"}
+                    </p>
+                  </button>
+
+                  <button
+                    onClick={() => navigateToTab("presentation")}
+                    className="p-5 bg-white border border-slate-200 hover:border-[#C5A021] rounded-xl shadow-xs hover:shadow-md transition-all text-start group cursor-pointer"
+                  >
+                    <div className="w-10 h-10 bg-amber-500/10 text-amber-600 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Presentation className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-serif font-bold text-[#1A365D] text-base mb-1">
+                      {isAr ? "عروض شريحية" : "Presentations"}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-mono">
+                      {isAr ? "توليد عرض شرائح تفاعلي فوراً" : "Instant interactive slides"}
+                    </p>
+                  </button>
+
+                  <button
+                    onClick={() => navigateToTab("qbank")}
+                    className="p-5 bg-white border border-slate-200 hover:border-[#C5A021] rounded-xl shadow-xs hover:shadow-md transition-all text-start group cursor-pointer"
+                  >
+                    <div className="w-10 h-10 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                      <Database className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-serif font-bold text-[#1A365D] text-base mb-1">
+                      {isAr ? "بنك الأسئلة" : "Question Bank"}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-mono">
+                      {isAr ? "توليد ونماذج التقييم الشاملة" : "Generate & export quiz banks"}
+                    </p>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "classrooms" && <ClassroomManager lang={lang} />}
+            {activeTab === "curriculum_library" && (
+              <CurriculumLibrary lang={lang} activeCountryCode={activeCountryCode} />
+            )}
+            {activeTab === "planner" && (
+              <LessonPlanner lang={lang} activeCountryCode={activeCountryCode} />
+            )}
+            {activeTab === "presentation" && <PresentationGenerator lang={lang} />}
+            {activeTab === "qbank" && <QuestionBank lang={lang} />}
+            {activeTab === "worksheet" && <WorksheetGenerator lang={lang} />}
+            {activeTab === "activity" && <ActivityDesigner lang={lang} />}
+            {activeTab === "teacher_library" && <TeacherLibrary lang={lang} />}
+            {activeTab === "gradebook" && <Gradebook lang={lang} />}
+            {activeTab === "summarizer" && <DocumentSummarizer lang={lang} />}
+            {activeTab === "parent" && <ParentMessageTab lang={lang} />}
+            {activeTab === "curriculum" && (
+              <CurriculumGuide lang={lang} activeCountryCode={activeCountryCode} />
+            )}
+            {activeTab === "voice" && <VoiceAssistant lang={lang} />}
+            {activeTab === "mobile" && <MobilePortal lang={lang} />}
+            {activeTab === "about" && <AboutWaddah lang={lang} />}
+            {activeTab === "admin" && <AdminPanel lang={lang} />}
+            {activeTab === "online_quizzes" && <StudentQuizPortal lang={lang} />}
+            {activeTab === "smart_analytics" && <SmartAnalytics lang={lang} />}
+            {activeTab === "ai_recommendations" && <AIRecommendationsView lang={lang} />}
+
+            {/* Phase 7 LMS Components */}
+            {activeTab === "student_portal" && <StudentPortal lang={lang} />}
+            {activeTab === "assignments_manager" && <AssignmentsManager lang={lang} />}
+            {activeTab === "student_tracking" && <StudentTrackingBoard lang={lang} />}
+            {activeTab === "parent_portal" && <ParentPortal lang={lang} />}
+            {activeTab === "messaging" && <EducationalMessaging lang={lang} />}
+            {activeTab === "gamification" && <GamificationAchievements lang={lang} />}
+            {activeTab === "virtual_classroom" && <VirtualClassroom lang={lang} />}
+            {activeTab === "admin_dashboard" && <AdminManagementDashboard lang={lang} />}
+
+            {/* Phase 8 Global EdTech Components */}
+            {activeTab === "teacher_marketplace" && <TeacherMarketplace lang={lang} />}
+            {activeTab === "teachers_community" && <TeachersCommunity lang={lang} />}
+            {activeTab === "digital_certificates" && <DigitalCertificates lang={lang} />}
+            {activeTab === "global_search" && <GlobalSmartSearch lang={lang} />}
           </div>
 
-          {/* Workspace Top Header */}
-          <header className="bg-white border-b border-slate-200 px-6 py-5 md:px-8 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-[#C5A021]" />
-                <span className="font-mono text-[10px] font-bold text-[#C5A021] bg-[#C5A021]/10 px-2 py-0.5 rounded border border-[#C5A021]/20">
-                  {isAr ? "بوابة المعلم العربي المحترف • وضاح للنشر" : "Professional Arab Teacher Portal"}
-                </span>
-              </div>
-              <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#1A365D] tracking-tight">
-                {isAr ? "المعلم العربي المحترف" : "The Professional Arab Teacher"}
-              </h1>
-              <p className="text-xs text-slate-500 max-w-2xl font-serif">
-                {isAr
-                  ? "منصة تعليمية متكاملة تدعم المعلم والطالب والإدارة مع المناهج الدراسية الجاهزة والتحليل الذكي."
-                  : "Integrated EdTech platform supporting teachers, students, and admin with preloaded curricula."}
+          {/* Platform Global Footer */}
+          <footer className="mt-auto border-t border-slate-200 bg-white py-4 px-6 text-center text-xs font-mono text-slate-500">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+              <p>
+                © {new Date().getFullYear()} {isAr ? "المعلم العربي المحترف" : "The Pro Teacher"}. {isAr ? "جميع الحقوق محفوظة لوضاح للنشر الرقمي" : "All rights reserved by Waddah Digital Publishing"}.
               </p>
-            </div>
-
-            {/* Action Row & Profile Button */}
-            <div className="flex items-center gap-3 self-start md:self-center flex-wrap">
-              <button
-                onClick={() => setShowAssistantModal(true)}
-                className="px-3.5 py-2 bg-[#C5A021] text-[#1A365D] hover:bg-amber-400 font-bold rounded-xl flex items-center gap-1.5 font-mono text-xs cursor-pointer shadow-sm transition-all"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#1A365D]" />
-                <span>{isAr ? "مساعد المعلم الذكي" : "Teacher Assistant"}</span>
-              </button>
-
-              <button
-                onClick={() => setShowProfileModal(true)}
-                className="px-3.5 py-2 bg-[#1A365D] text-white hover:bg-[#122846] border border-[#C5A021] rounded-xl flex items-center gap-1.5 font-mono text-xs cursor-pointer shadow-sm transition-all"
-              >
-                <Award className="w-3.5 h-3.5 text-[#C5A021]" />
-                <span>
-                  {teacherProfile?.name
-                    ? `${isAr ? "الملف:" : "Profile:"} ${teacherProfile.name}`
-                    : isAr
-                    ? "الملف الشخصي"
-                    : "User Profile"}
-                </span>
-              </button>
-            </div>
-          </header>
-
-          {/* Dynamic Metric Statistics Grid */}
-          <section className="px-6 pt-6 md:px-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div
-              onClick={() => setActiveTab("classrooms")}
-              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-24 hover:border-[#C5A021]/50 hover:shadow-md cursor-pointer transition-all active:scale-95 group"
-            >
-              <p className="text-[11px] font-mono font-bold text-slate-500 group-hover:text-[#C5A021] transition-colors">
-                {isAr ? "إجمالي الطلاب بالفصول" : "Registered Students"}
-              </p>
-              <h3 className="text-2xl font-serif font-bold text-[#1A365D]">142</h3>
-              <div className="text-[9px] font-mono text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded self-start">
-                {isAr ? "فصول نشطة بالكامل" : "Active Roster"}
-              </div>
-            </div>
-
-            <div
-              onClick={() => setActiveTab("planner")}
-              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-24 hover:border-[#C5A021]/50 hover:shadow-md cursor-pointer transition-all active:scale-95 group"
-            >
-              <p className="text-[11px] font-mono font-bold text-slate-500 group-hover:text-[#C5A021] transition-colors">
-                {isAr ? "الدروس وخطط التحضير" : "Lessons Generated"}
-              </p>
-              <h3 className="text-2xl font-serif font-bold text-[#1A365D]">48</h3>
-              <div className="text-[9px] font-mono text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded self-start">
-                {isAr ? "توفير 15 ساعة عمل" : "Saved 15 hours"}
-              </div>
-            </div>
-
-            <div
-              onClick={() => setActiveTab("online_quizzes")}
-              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-24 hover:border-[#C5A021]/50 hover:shadow-md cursor-pointer transition-all active:scale-95 group"
-            >
-              <p className="text-[11px] font-mono font-bold text-slate-500 group-hover:text-[#C5A021] transition-colors">
-                {isAr ? "الاختبارات الإلكترونية" : "Online Quizzes"}
-              </p>
-              <h3 className="text-2xl font-serif font-bold text-[#1A365D]">12</h3>
-              <div className="text-[9px] font-mono text-amber-600 font-bold bg-amber-50 px-1.5 py-0.5 rounded self-start">
-                {isAr ? "تصحيح فوري تلقائي" : "Auto-Graded"}
-              </div>
-            </div>
-
-            <div
-              onClick={() => setActiveTab("smart_analytics")}
-              className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between h-24 hover:border-[#C5A021]/50 hover:shadow-md cursor-pointer transition-all active:scale-95 group"
-            >
-              <p className="text-[11px] font-mono font-bold text-slate-500 group-hover:text-[#C5A021] transition-colors">
-                {isAr ? "نسبة النجاح العامة" : "Pass Percentage"}
-              </p>
-              <h3 className="text-2xl font-serif font-bold text-emerald-700">88%</h3>
-              <div className="text-[9px] font-mono text-indigo-600 font-bold bg-indigo-50 px-1.5 py-0.5 rounded self-start">
-                {isAr ? "خطط علاجية متاحة" : "Remedial plans ready"}
-              </div>
-            </div>
-          </section>
-
-          {/* Main Component Render Tab Slot */}
-          <main
-            ref={contentRef}
-            className="flex-1 px-6 py-6 md:px-8 scroll-mt-6 space-y-4"
-          >
-            <OfflineStatusBanner lang={lang} />
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab + "_" + lang + "_" + currentRole}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
-              >
-                {activeTab === "dashboard" && (
-                  <div className="space-y-8 animate-fade-in" id="dashboard-tab-content">
-                    {/* Welcome Hero Card */}
-                    <div className="bg-gradient-to-br from-[#1A365D] to-[#122846] text-white p-6 md:p-8 rounded-2xl border-2 border-[#C5A021]/30 shadow-lg relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-64 h-64 bg-[#C5A021]/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                      <div className="relative z-10 space-y-4">
-                        <span className="font-mono text-[10px] font-bold text-[#C5A021] bg-[#C5A021]/15 px-2.5 py-1 rounded border border-[#C5A021]/30 uppercase tracking-widest inline-block">
-                          {isAr ? "منصة التعليم الرقمية متكاملة (المرحلة 4)" : "Integrated Platform (Phase 4)"}
-                        </span>
-                        <h2 className="text-2xl md:text-3xl font-serif font-bold text-[#C5A021]">
-                          {isAr ? "أهلاً بك في بوابة المعلم العربي المحترف" : "Welcome to Arab Pro Teacher Portal"}
-                        </h2>
-                        <p className="text-xs md:text-sm text-slate-200 max-w-3xl leading-relaxed font-serif">
-                          {isAr
-                            ? "منصة تعليمية متكاملة تجمع بين المكتبة المنهجية الجاهزة، أدوات التحضير الذكي للدروس والعروض، إدارة الفصول والحضور، الاختبارات الإلكترونية بالتصحيح الفوري، والتحليل البيداغوجي الذكي."
-                            : "A complete EdTech platform integrating preloaded curricula, smart lesson planning, classroom management, timed online exams, and AI pedagogical analytics."}
-                        </p>
-                        <div className="pt-2 flex flex-wrap gap-3">
-                          <button
-                            onClick={() => setActiveTab("classrooms")}
-                            className="bg-[#C5A021] text-[#1A365D] hover:bg-[#D9B430] font-sans font-bold text-xs px-4 py-2 rounded-lg shadow-md transition-all active:scale-95 cursor-pointer"
-                          >
-                            {isAr ? "إدارة الفصول والحضور 👥" : "Classroom Management 👥"}
-                          </button>
-                          <button
-                            onClick={() => setActiveTab("curriculum_library")}
-                            className="bg-white/10 text-white hover:bg-white/15 font-sans font-medium text-xs px-4 py-2 rounded-lg border border-white/20 transition-all active:scale-95 cursor-pointer"
-                          >
-                            {isAr ? "تصفح المكتبة المنهجية 📚" : "Browse Curriculum 📚"}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Section Title */}
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-serif font-bold text-[#1A365D]">
-                        {isAr ? "الأقسام والأدوات الرئيسية في المنصة" : "Platform Main Sections"}
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        {isAr
-                          ? "اختر الأداة أو القسم المطلوب للانتقال الفوري إليه."
-                          : "Select any tool to navigate directly."}
-                      </p>
-                    </div>
-
-                    {/* Features Bento Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {/* Phase 4: Classrooms Card */}
-                      <div
-                        onClick={() => setActiveTab("classrooms")}
-                        className="group bg-gradient-to-br from-[#1A365D]/5 to-white p-6 rounded-2xl border-2 border-[#1A365D]/30 hover:border-[#C5A021] hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between space-y-4"
-                      >
-                        <div className="space-y-3">
-                          <div className="w-10 h-10 bg-[#1A365D] text-[#C5A021] rounded-xl flex items-center justify-center font-bold shadow-md">
-                            <Users className="w-5 h-5" />
-                          </div>
-                          <h4 className="text-base font-serif font-bold text-[#1A365D] group-hover:text-[#C5A021] transition-colors flex items-center gap-2">
-                            <span>{isAr ? "إدارة الفصول والحضور" : "Classroom Management"}</span>
-                            <span className="bg-amber-100 text-amber-800 text-[9px] font-mono px-2 py-0.5 rounded-full">المرحلة 4</span>
-                          </h4>
-                          <p className="text-xs text-slate-600 leading-relaxed font-serif">
-                            {isAr
-                              ? "تنظيم قوائم الطلاب حسب الصفوف والشعب، تسجيل الحضور والغياب اليومي، ورصد درجات الواجبات والمشاركة والاختبار."
-                              : "Roster management, daily attendance logs, homework and exam score tracking for each class."}
-                          </p>
-                        </div>
-                        <div className="pt-2 text-xs font-mono font-bold text-[#1A365D] flex items-center gap-1">
-                          <span>{isAr ? "دخول إدارة الفصول ←" : "Open Classrooms ←"}</span>
-                        </div>
-                      </div>
-
-                      {/* Phase 4: Online Quizzes Card */}
-                      <div
-                        onClick={() => setActiveTab("online_quizzes")}
-                        className="group bg-gradient-to-br from-amber-50 to-white p-6 rounded-2xl border-2 border-[#C5A021]/60 hover:border-[#C5A021] hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between space-y-4"
-                      >
-                        <div className="space-y-3">
-                          <div className="w-10 h-10 bg-[#C5A021] text-[#1A365D] rounded-xl flex items-center justify-center font-bold shadow-md">
-                            <FileCheck2 className="w-5 h-5" />
-                          </div>
-                          <h4 className="text-base font-serif font-bold text-[#1A365D] group-hover:text-[#C5A021] transition-colors flex items-center gap-2">
-                            <span>{isAr ? "الاختبارات والتصحيح الآلي" : "Online Timed Quizzes"}</span>
-                            <span className="bg-amber-100 text-amber-800 text-[9px] font-mono px-2 py-0.5 rounded-full">المرحلة 4</span>
-                          </h4>
-                          <p className="text-xs text-slate-600 leading-relaxed font-serif">
-                            {isAr
-                              ? "نشر اختبارات إلكترونية محددة بزمن للطلاب مع التصحيح الفوري الآلي وعرض التقييم والتغذية الراجعة."
-                              : "Publish timed quizzes for students with instant automated grading and personalized AI guidance."}
-                          </p>
-                        </div>
-                        <div className="pt-2 text-xs font-mono font-bold text-[#C5A021] flex items-center gap-1">
-                          <span>{isAr ? "دخول بوابة الاختبارات ←" : "Open Quizzes ←"}</span>
-                        </div>
-                      </div>
-
-                      {/* Phase 4: Smart Analytics Card */}
-                      <div
-                        onClick={() => setActiveTab("smart_analytics")}
-                        className="group bg-gradient-to-br from-purple-50 to-white p-6 rounded-2xl border-2 border-purple-200 hover:border-purple-500 hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between space-y-4"
-                      >
-                        <div className="space-y-3">
-                          <div className="w-10 h-10 bg-purple-700 text-white rounded-xl flex items-center justify-center font-bold shadow-md">
-                            <BarChart3 className="w-5 h-5" />
-                          </div>
-                          <h4 className="text-base font-serif font-bold text-[#1A365D] group-hover:text-purple-700 transition-colors flex items-center gap-2">
-                            <span>{isAr ? "التقارير والتحليلات الذكية" : "Smart Reports"}</span>
-                            <span className="bg-purple-100 text-purple-800 text-[9px] font-mono px-2 py-0.5 rounded-full">المرحلة 4</span>
-                          </h4>
-                          <p className="text-xs text-slate-600 leading-relaxed font-serif">
-                            {isAr
-                              ? "تقارير شاملة عن أداء الطلاب، تحليل الفجوات والمهارات الضعيفة، وتوليد الخطط العلاجية بالذكاء الاصطناعي."
-                              : "Performance analytics, skill gap identification, and AI remedial plan generator for teachers and admin."}
-                          </p>
-                        </div>
-                        <div className="pt-2 text-xs font-mono font-bold text-purple-800 flex items-center gap-1">
-                          <span>{isAr ? "عرض التقارير والتحليل ←" : "View Analytics ←"}</span>
-                        </div>
-                      </div>
-
-                      {/* Ready Curriculum Library Card */}
-                      <div
-                        onClick={() => setActiveTab("curriculum_library")}
-                        className="group bg-white p-6 rounded-2xl border border-slate-200 hover:border-[#C5A021] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4"
-                      >
-                        <div className="space-y-3">
-                          <div className="w-10 h-10 bg-[#C5A021]/10 rounded-xl flex items-center justify-center">
-                            <BookOpen className="w-5 h-5 text-[#C5A021]" />
-                          </div>
-                          <h4 className="text-base font-serif font-bold text-[#1A365D] group-hover:text-[#C5A021] transition-colors">
-                            {isAr ? "المكتبة المنهجية الجاهزة" : "Curriculum Library"}
-                          </h4>
-                          <p className="text-xs text-slate-500 leading-relaxed font-serif">
-                            {isAr
-                              ? "قاعدة بيانات الكتب والمناهج المعتمدة مع خاصية البحث الـ RAG الذكي."
-                              : "Preloaded structured textbooks with AI RAG curriculum search."}
-                          </p>
-                        </div>
-                        <div className="pt-2 text-xs font-mono font-bold text-[#C5A021] flex items-center gap-1">
-                          <span>{isAr ? "تصفح المكتبة ←" : "Browse Library ←"}</span>
-                        </div>
-                      </div>
-
-                      {/* Presentation Generator Card */}
-                      <div
-                        onClick={() => setActiveTab("presentation")}
-                        className="group bg-white p-6 rounded-2xl border border-slate-200 hover:border-[#C5A021] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4"
-                      >
-                        <div className="space-y-3">
-                          <div className="w-10 h-10 bg-[#C5A021]/10 rounded-xl flex items-center justify-center">
-                            <Presentation className="w-5 h-5 text-[#C5A021]" />
-                          </div>
-                          <h4 className="text-base font-serif font-bold text-[#1A365D] group-hover:text-[#C5A021] transition-colors">
-                            {isAr ? "مولد العروض التقديمية (PPTX)" : "Presentation Generator"}
-                          </h4>
-                          <p className="text-xs text-slate-500 leading-relaxed font-serif">
-                            {isAr
-                              ? "توليد شرائح تفاعلية قابلة للتنزيل بصيغة PowerPoint."
-                              : "Generate PowerPoint presentation slides instantly."}
-                          </p>
-                        </div>
-                        <div className="pt-2 text-xs font-mono font-bold text-[#C5A021] flex items-center gap-1">
-                          <span>{isAr ? "إنشاء عرض ←" : "Create Slides ←"}</span>
-                        </div>
-                      </div>
-
-                      {/* Question Bank Card */}
-                      <div
-                        onClick={() => setActiveTab("qbank")}
-                        className="group bg-white p-6 rounded-2xl border border-slate-200 hover:border-[#C5A021] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4"
-                      >
-                        <div className="space-y-3">
-                          <div className="w-10 h-10 bg-[#C5A021]/10 rounded-xl flex items-center justify-center">
-                            <Database className="w-5 h-5 text-[#C5A021]" />
-                          </div>
-                          <h4 className="text-base font-serif font-bold text-[#1A365D] group-hover:text-[#C5A021] transition-colors">
-                            {isAr ? "بنك الأسئلة الذكي" : "Smart Question Bank"}
-                          </h4>
-                          <p className="text-xs text-slate-500 leading-relaxed font-serif">
-                            {isAr
-                              ? "حفظ وتنظيم وتدوير الأسئلة ونشرها كاختبارات للطلاب."
-                              : "Store, search, and publish question bank items as online quizzes."}
-                          </p>
-                        </div>
-                        <div className="pt-2 text-xs font-mono font-bold text-[#C5A021] flex items-center gap-1">
-                          <span>{isAr ? "دخول بنك الأسئلة ←" : "Open Question Bank ←"}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tab Views */}
-                {activeTab === "student_portal" && (
-                  <StudentPortal lang={lang} currentUserName="عمر حسن التعزي" />
-                )}
-                {activeTab === "assignments_manager" && (
-                  <AssignmentsManager
-                    lang={lang}
-                    currentTeacherName={teacherProfile?.name || "أستاذ اللغة العربية"}
-                  />
-                )}
-                {activeTab === "student_tracking" && (
-                  <StudentTrackingBoard lang={lang} />
-                )}
-                {activeTab === "parent_portal" && <ParentPortal lang={lang} />}
-                {activeTab === "messaging" && (
-                  <EducationalMessaging
-                    lang={lang}
-                    currentUserId="teacher_1"
-                    currentUserName={teacherProfile?.name || "أستاذ اللغة العربية"}
-                    currentUserRole={currentRole}
-                  />
-                )}
-                {activeTab === "gamification" && (
-                  <GamificationAchievements lang={lang} studentId="st_student_1" />
-                )}
-                {activeTab === "virtual_classroom" && (
-                  <VirtualClassroom
-                    lang={lang}
-                    currentUserName={teacherProfile?.name || "أستاذ اللغة العربية"}
-                    currentUserRole={currentRole}
-                  />
-                )}
-                {activeTab === "admin_dashboard" && (
-                  <AdminManagementDashboard lang={lang} />
-                )}
-                {activeTab === "teacher_marketplace" && (
-                  <TeacherMarketplace lang={lang} />
-                )}
-                {activeTab === "teachers_community" && (
-                  <TeachersCommunity lang={lang} />
-                )}
-                {activeTab === "digital_certificates" && (
-                  <DigitalCertificates lang={lang} />
-                )}
-                {activeTab === "global_search" && (
-                  <GlobalSmartSearch lang={lang} onNavigateTab={(tab) => setActiveTab(tab)} />
-                )}
-
-                {activeTab === "classrooms" && <ClassroomManager isAr={isAr} />}
-                {activeTab === "online_quizzes" && (
-                  <StudentQuizPortal isAr={isAr} userRole={currentRole} />
-                )}
-                {activeTab === "smart_analytics" && (
-                  <SmartAnalytics isAr={isAr} userRole={currentRole} />
-                )}
-                {activeTab === "ai_recommendations" && (
-                  <AIRecommendationsView isAr={isAr} userRole={currentRole} />
-                )}
-                {activeTab === "curriculum_library" && (
-                  <CurriculumLibrary
-                    lang={lang}
-                    onNavigateToTool={(tool) => setActiveTab(tool)}
-                  />
-                )}
-                {activeTab === "planner" && (
-                  <LessonPlanner lang={lang} teacherProfile={teacherProfile} activeCountryCode={activeCountryCode} />
-                )}
-                {activeTab === "presentation" && (
-                  <PresentationGenerator lang={lang} teacherProfile={teacherProfile} activeCountryCode={activeCountryCode} />
-                )}
-                {activeTab === "qbank" && <QuestionBank isAr={isAr} />}
-                {activeTab === "worksheet" && (
-                  <WorksheetGenerator isAr={isAr} teacherProfile={teacherProfile} activeCountryCode={activeCountryCode} />
-                )}
-                {activeTab === "activity" && (
-                  <ActivityDesigner isAr={isAr} teacherProfile={teacherProfile} activeCountryCode={activeCountryCode} />
-                )}
-                {activeTab === "teacher_library" && (
-                  <TeacherLibrary
-                    lang={lang}
-                    onNavigateToTool={(tool) => setActiveTab(tool)}
-                  />
-                )}
-                {activeTab === "gradebook" && <Gradebook lang={lang} />}
-                {activeTab === "summarizer" && <DocumentSummarizer lang={lang} />}
-                {activeTab === "parent" && <ParentMessageTab lang={lang} />}
-                {activeTab === "curriculum" && <CurriculumGuide lang={lang} />}
-                {activeTab === "voice" && <VoiceAssistant lang={lang} />}
-                {activeTab === "mobile" && <MobilePortal lang={lang} />}
-                {activeTab === "admin" && <AdminPanel lang={lang} />}
-                {activeTab === "about" && <AboutWaddah lang={lang} />}
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Teacher Assistant Modal */}
-            {showAssistantModal && (
-              <TeacherAssistantModal
-                isOpen={showAssistantModal}
-                onClose={() => setShowAssistantModal(false)}
-                lang={lang}
-                teacherProfile={teacherProfile}
-                activeCountryCode={activeCountryCode}
-              />
-            )}
-
-            {/* Enhanced Profile Modal */}
-            {showProfileModal && (
-              <EnhancedUserProfileModal
-                isOpen={showProfileModal}
-                onClose={() => setShowProfileModal(false)}
-                userRole={currentRole}
-                teacherProfile={teacherProfile || DEFAULT_TEACHER_PROFILE}
-                onSaveTeacherProfile={(profile) => {
-                  setTeacherProfile(profile);
-                  localStorage.setItem("ai_teacher_profile", JSON.stringify(profile));
-                }}
-                isAr={isAr}
-              />
-            )}
-          </main>
-
-          {/* Premium Professional Publishing Footer */}
-          <footer className="bg-[#122846] text-slate-100 border-t border-[#C5A021]/30 py-10 px-6 md:px-8 mt-auto">
-            <div className="max-w-7xl w-full mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-xs">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Award className="w-5 h-5 text-[#C5A021]" />
-                  <h3 className="text-base font-serif font-bold text-[#C5A021]">
-                    {isAr ? "وضاح للنشر الرقمي" : "Waddah Digital Publishing"}
-                  </h3>
-                </div>
-                <p className="text-slate-300 leading-relaxed font-sans">
-                  {isAr
-                    ? "منصة تعليمية متكاملة لتمكين المعلمين والطلاب والإدارة وإعادة التوازن المعرفي بالعودة إلى التعليم الأصيل."
-                    : "Integrated EdTech platform for teachers, students, and administration."}
-                </p>
-                <p className="text-[10px] font-mono text-[#C5A021] bg-[#C5A021]/10 py-1 px-2.5 rounded border border-[#C5A021]/20 inline-block">
-                  {isAr
-                    ? "تأسيس وملكية: وضاح أحمد حسن الزليل"
-                    : "Founder & Proprietor: Waddah Ahmed Hassan Al-Zulil"}
-                </p>
-              </div>
-
-              <div className="space-y-3 border-t md:border-t-0 md:border-x border-slate-700/50 md:px-8 pt-5 md:pt-0">
-                <h4 className="font-serif font-bold text-sm text-[#C5A021] flex items-center gap-2">
-                  <Heart className="w-4 h-4 fill-[#C5A021] text-[#C5A021]" />
-                  <span>{isAr ? "مبادئ المعلم الرقمي الهادئ" : "The Mindful Educator's Manifesto"}</span>
-                </h4>
-                <ul className="space-y-2 text-slate-300 font-serif">
-                  {isAr ? (
-                    <>
-                      <li>• تفضيل الدفاتر الورقية والأنشطة اليدوية داخل الصف.</li>
-                      <li>• تشجيع الطلاب على القراءة من كتب مطبوعة للتركيز الكامل.</li>
-                      <li>• شراكة حقيقية مع أولياء الأمور للسيطرة على تشتت الشاشات.</li>
-                    </>
-                  ) : (
-                    <>
-                      <li>• Prioritizing physical tasks, real paper books, and writing tools.</li>
-                      <li>• Nurturing student reading habits without digital interruptions.</li>
-                      <li>• Aligning with families for a healthier home-screen balance.</li>
-                    </>
-                  )}
-                </ul>
-              </div>
-
-              <div className="space-y-3 pt-5 md:pt-0">
-                <h4 className="font-serif font-bold text-sm text-[#C5A021]">
-                  {isAr ? "الملكية الفكرية ورخص الاستخدام" : "Licensing & Support"}
-                </h4>
-                <div className="space-y-1.5 text-slate-400">
-                  <p className="leading-relaxed">
-                    {isAr
-                      ? "جميع الحقوق الفكرية والملكية محفوظة © 2026 للأستاذ وضاح أحمد حسن الزليل."
-                      : "All intellectual rights reserved © 2026 under Waddah Ahmed Hassan Al-Zulil."}
-                  </p>
-                  <div className="pt-2 flex items-center gap-2">
-                    <span className="text-[9px] bg-[#C5A021]/20 text-[#C5A021] px-2 py-0.5 rounded border border-[#C5A021]/30">
-                      {isAr ? "البريد الإلكتروني" : "Contact Mail"}
-                    </span>
-                    <span className="text-[10px] text-slate-300 font-mono">alhjwrywdah86@gmail.com</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="max-w-7xl w-full mx-auto border-t border-slate-800 mt-8 pt-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-mono text-slate-500">
-              <div>
-                © 2026 {isAr ? "المعلم العربي المحترف" : "Arab Professional Teacher"} | {isAr ? "وضاح للنشر الرقمي" : "Waddah Digital Publishing"}
-              </div>
-              <div className="flex items-center gap-2">
-                <span>{isAr ? "الجمهورية اليمنية" : "Republic of Yemen"}</span>
-                <span>•</span>
-                <span>{isAr ? "صنعاء / ريف اليمن المعطاء" : "Sanaa / Rural Yemen"}</span>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => {
+                    setShowLegalModal(true);
+                    setLegalTab("privacy");
+                  }}
+                  className="hover:text-[#1A365D] underline cursor-pointer"
+                >
+                  {isAr ? "سياسة الخصوصية" : "Privacy Policy"}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLegalModal(true);
+                    setLegalTab("terms");
+                  }}
+                  className="hover:text-[#1A365D] underline cursor-pointer"
+                >
+                  {isAr ? "الشروط والأحكام" : "Terms of Service"}
+                </button>
               </div>
             </div>
           </footer>
-        </div>
+        </main>
       </div>
 
-      {/* PHASE 5 SAAS MODALS */}
+      {/* GLOBAL MODALS CONTAINER */}
+      {showProfileModal && (
+        <EnhancedUserProfileModal
+          lang={lang}
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          profile={teacherProfile || DEFAULT_TEACHER_PROFILE}
+          onSave={(updated) => {
+            setTeacherProfile(updated);
+            localStorage.setItem("ai_teacher_profile", JSON.stringify(updated));
+            setShowProfileModal(false);
+          }}
+        />
+      )}
+
+      {showAssistantModal && (
+        <TeacherAssistantModal
+          lang={lang}
+          isOpen={showAssistantModal}
+          onClose={() => setShowAssistantModal(false)}
+        />
+      )}
+
       {showSubscriptionModal && (
         <SubscriptionModal
           lang={lang}
-          currentSubscription={userSubscription}
+          isOpen={showSubscriptionModal}
           onClose={() => setShowSubscriptionModal(false)}
-          onUpgradeSuccess={(updatedSub) => {
-            setUserSubscription(updatedSub);
-            localStorage.setItem("pro_teacher_subscription", JSON.stringify(updatedSub));
+          currentSubscription={userSubscription}
+          onUpgradeSuccess={(newSub) => {
+            setUserSubscription(newSub);
+            localStorage.setItem("pro_teacher_subscription", JSON.stringify(newSub));
           }}
         />
       )}
@@ -1351,6 +1005,7 @@ export default function App() {
       {showLegalModal && (
         <LegalPagesModal
           lang={lang}
+          isOpen={showLegalModal}
           initialTab={legalTab}
           onClose={() => setShowLegalModal(false)}
         />
@@ -1359,95 +1014,26 @@ export default function App() {
       {showBackupModal && (
         <DataBackupModal
           lang={lang}
+          isOpen={showBackupModal}
           onClose={() => setShowBackupModal(false)}
         />
       )}
 
-      {showProfileModal && (
-        <EnhancedUserProfileModal
-          isOpen={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          userRole={currentRole}
-          teacherProfile={teacherProfile || {
-            name: "أ. وضاح أحمد حسن الزليل",
-            title: "خبير ومصمم مناهج رقمية",
-            subject: "اللغة العربية والتربية الإسلامية",
-            school: "مدرسة المتفوقين النموذجية",
-            bio: "مؤسس منصة المعلم العربي المحترف لتمكين المعلمين بالأدوات الذكية."
-          }}
-          onSaveTeacherProfile={(profile) => {
-            setTeacherProfile(profile);
-            localStorage.setItem("ai_teacher_profile", JSON.stringify(profile));
-          }}
-          isAr={isAr}
+      {showSmartSearchModal && (
+        <SmartSearchModal
+          lang={lang}
+          isOpen={showSmartSearchModal}
+          onClose={() => setShowSmartSearchModal(false)}
         />
       )}
 
-      {/* PHASE 6 MODALS */}
-      <SmartSearchModal
-        isOpen={showSmartSearchModal}
-        onClose={() => setShowSmartSearchModal(false)}
-        lang={lang}
-      />
-
-      <AIEssayGraderModal
-        isOpen={showEssayGraderModal}
-        onClose={() => setShowEssayGraderModal(false)}
-        lang={lang}
-      />
-
-      {/* Mobile Bottom Quick Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#122846] border-t border-[#C5A021]/30 py-2 px-3 flex justify-around items-center text-slate-300 text-[10px] font-mono shadow-2xl backdrop-blur-md bg-opacity-95">
-        <button
-          onClick={() => navigateToTab("dashboard")}
-          className={`flex flex-col items-center gap-1 cursor-pointer transition-all min-w-[50px] min-h-[44px] justify-center ${
-            activeTab === "dashboard" ? "text-[#C5A021] font-bold" : "hover:text-white"
-          }`}
-        >
-          <Layers className="w-5 h-5" />
-          <span>{isAr ? "الرئيسية" : "Home"}</span>
-        </button>
-
-        <button
-          onClick={() => navigateToTab("planner")}
-          className={`flex flex-col items-center gap-1 cursor-pointer transition-all min-w-[50px] min-h-[44px] justify-center ${
-            activeTab === "planner" ? "text-[#C5A021] font-bold" : "hover:text-white"
-          }`}
-        >
-          <BookOpen className="w-5 h-5" />
-          <span>{isAr ? "التحضير" : "Planner"}</span>
-        </button>
-
-        <button
-          onClick={() => navigateToTab("student_portal")}
-          className={`flex flex-col items-center gap-1 cursor-pointer transition-all min-w-[50px] min-h-[44px] justify-center ${
-            activeTab === "student_portal" ? "text-[#C5A021] font-bold" : "hover:text-white"
-          }`}
-        >
-          <GraduationCap className="w-5 h-5 text-emerald-400" />
-          <span>{isAr ? "الطالب" : "Student"}</span>
-        </button>
-
-        <button
-          onClick={() => navigateToTab("global_search")}
-          className={`flex flex-col items-center gap-1 cursor-pointer transition-all min-w-[50px] min-h-[44px] justify-center ${
-            activeTab === "global_search" ? "text-[#C5A021] font-bold" : "hover:text-white"
-          }`}
-        >
-          <Search className="w-5 h-5 text-amber-300" />
-          <span>{isAr ? "البحث" : "Search"}</span>
-        </button>
-
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className={`flex flex-col items-center gap-1 cursor-pointer transition-all min-w-[50px] min-h-[44px] justify-center ${
-            mobileMenuOpen ? "text-[#C5A021] font-bold" : "hover:text-white"
-          }`}
-        >
-          <Menu className="w-5 h-5" />
-          <span>{isAr ? "القائمة" : "Menu"}</span>
-        </button>
-      </nav>
+      {showEssayGraderModal && (
+        <AIEssayGraderModal
+          lang={lang}
+          isOpen={showEssayGraderModal}
+          onClose={() => setShowEssayGraderModal(false)}
+        />
+      )}
     </div>
   );
-}
+                    }
