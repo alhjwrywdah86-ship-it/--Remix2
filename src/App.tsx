@@ -212,7 +212,7 @@ export default function App() {
 
   return (
     <div
-      className="min-h-screen bg-[#F8FAFC] text-[#1A365D] flex flex-col selection:bg-[#C5A021] selection:text-white"
+      className="min-h-screen bg-[#F8FAFC] text-[#1A365D] flex flex-col selection:bg-[#C5A021] selection:text-white pb-16 md:pb-0"
       dir={isAr ? "rtl" : "ltr"}
     >
       {/* PHASE 4: GLOBAL ROLE & NOTIFICATION HEADER */}
@@ -302,7 +302,7 @@ export default function App() {
                   {isAr ? "المعلم المحترف" : "The Pro Teacher"}
                 </span>
                 <span className="text-[9px] font-mono tracking-wider text-white/50 uppercase">
-                  {isAr ? "منصة التعليم الذكية" : "EdTech Platform Phase 4"}
+                  {isAr ? "منصة التعليم الذكية" : "EdTech Platform"}
                 </span>
               </div>
             </div>
@@ -450,122 +450,8 @@ export default function App() {
 
                 <div className="pt-2 border-t border-white/10 space-y-1">
                   <p className="text-[9px] font-mono text-[#C5A021] px-3 pb-1 uppercase tracking-wider font-bold">
-                    {isAr ? "المنصة التعليمية المتكاملة (LMS Platform)" : "LMS Platform"}
-                  </p>
-
-                  <button
-                    onClick={() => navigateToTab("student_portal")}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                      activeTab === "student_portal"
-                        ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                        : "text-slate-300 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <GraduationCap className="w-4 h-4 flex-shrink-0 text-emerald-400" />
-                    <span className="font-bold text-emerald-300">{isAr ? "مساحة الطالب الذكية" : "Student Portal"}</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigateToTab("assignments_manager")}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                      activeTab === "assignments_manager"
-                        ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                        : "text-slate-300 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <FileCheck2 className="w-4 h-4 flex-shrink-0 text-purple-400" />
-                    <span>{isAr ? "نظام الواجبات الذكي" : "Assignments Manager"}</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigateToTab("student_tracking")}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                      activeTab === "student_tracking"
-                        ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                        : "text-slate-300 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <Users className="w-4 h-4 flex-shrink-0 text-amber-300" />
-                    <span>{isAr ? "لوحة المتابعة اليومية" : "Daily Tracking Board"}</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigateToTab("parent_portal")}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                      activeTab === "parent_portal"
-                        ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                        : "text-slate-300 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <Users className="w-4 h-4 flex-shrink-0 text-[#C5A021]" />
-                    <span className="font-bold text-amber-200">{isAr ? "بوابة ولي الأمر" : "Parent Portal"}</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigateToTab("messaging")}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                      activeTab === "messaging"
-                        ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                        : "text-slate-300 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <HelpCircle className="w-4 h-4 flex-shrink-0 text-blue-300" />
-                    <span>{isAr ? "التواصل والإعلانات" : "Messaging Center"}</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigateToTab("virtual_classroom")}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                      activeTab === "virtual_classroom"
-                        ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                        : "text-slate-300 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <BookOpen className="w-4 h-4 flex-shrink-0 text-emerald-300" />
-                    <span>{isAr ? "الفصل الافتراضي" : "Virtual Classroom"}</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigateToTab("gamification")}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                      activeTab === "gamification"
-                        ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                        : "text-slate-300 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <AwardIcon className="w-4 h-4 flex-shrink-0 text-amber-300" />
-                    <span>{isAr ? "الإنجازات والأوسمة" : "Achievements & Badges"}</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigateToTab("admin_dashboard")}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                      activeTab === "admin_dashboard"
-                        ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                        : "text-slate-300 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <Shield className="w-4 h-4 flex-shrink-0 text-purple-300" />
-                    <span className="font-bold text-purple-200">{isAr ? "لوحة الإدارة التعليمية" : "Admin Dashboard"}</span>
-                  </button>
-                </div>
-
-                <div className="pt-2 border-t border-white/10 space-y-1">
-                  <p className="text-[9px] font-mono text-[#C5A021] px-3 pb-1 uppercase tracking-wider font-bold">
                     {isAr ? "المنظومة العالمية والمجتمع" : "Global Platform & Community"}
                   </p>
-
-                  <button
-                    onClick={() => navigateToTab("teacher_marketplace")}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                      activeTab === "teacher_marketplace"
-                        ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                        : "text-slate-300 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <Zap className="w-4 h-4 flex-shrink-0 text-amber-300" />
-                    <span>{isAr ? "متجر المعلم للموارد" : "Teacher Marketplace"}</span>
-                  </button>
 
                   <button
                     onClick={() => navigateToTab("teachers_community")}
@@ -606,7 +492,7 @@ export default function App() {
 
                 <div className="pt-2 border-t border-white/10 space-y-1">
                   <p className="text-[9px] font-mono text-[#C5A021] px-3 pb-1 uppercase tracking-wider font-bold">
-                    {isAr ? "أدوات الذكاء الاصطناعي المتقدمة" : "AI Advanced Tools"}
+                    {isAr ? "أدوات الذكاء الاصطناعي المتقدمة (PHASE 6)" : "AI Advanced Tools"}
                   </p>
 
                   <button
@@ -659,30 +545,6 @@ export default function App() {
                   <FileCheck2 className="w-4 h-4 flex-shrink-0 text-[#C5A021]" />
                   <span>{isAr ? "الاختبارات والتصحيح" : "Online Quizzes"}</span>
                 </button>
-
-                <button
-                  onClick={() => navigateToTab("ai_recommendations")}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                    activeTab === "ai_recommendations"
-                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4 flex-shrink-0 text-amber-300" />
-                  <span>{isAr ? "دليلي للتفوق والمراجعة" : "My Study Guide"}</span>
-                </button>
-
-                <button
-                  onClick={() => navigateToTab("gamification")}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                    activeTab === "gamification"
-                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <AwardIcon className="w-4 h-4 flex-shrink-0 text-amber-300" />
-                  <span>{isAr ? "شاراتي وأوسمتي" : "Badges & Achievements"}</span>
-                </button>
               </>
             )}
 
@@ -699,102 +561,101 @@ export default function App() {
                   <Shield className="w-4 h-4 flex-shrink-0 text-purple-300" />
                   <span>{isAr ? "لوحة الإدارة والمتابعة" : "Admin Dashboard"}</span>
                 </button>
-
-                <button
-                  onClick={() => navigateToTab("smart_analytics")}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                    activeTab === "smart_analytics"
-                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <BarChart3 className="w-4 h-4 flex-shrink-0 text-purple-300" />
-                  <span>{isAr ? "تحليلات الأداء الشاملة" : "Comprehensive Analytics"}</span>
-                </button>
-
-                <button
-                  onClick={() => navigateToTab("curriculum_library")}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                    activeTab === "curriculum_library"
-                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <BookOpen className="w-4 h-4 flex-shrink-0 text-[#C5A021]" />
-                  <span>{isAr ? "المكتبة المنهجية" : "Curriculum Library"}</span>
-                </button>
-              </>
-            )}
-
-            {currentRole === "parent" && (
-              <>
-                <button
-                  onClick={() => navigateToTab("parent_portal")}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                    activeTab === "parent_portal"
-                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <Users className="w-4 h-4 flex-shrink-0 text-[#C5A021]" />
-                  <span>{isAr ? "بوابة ولي الأمر" : "Parent Portal"}</span>
-                </button>
-
-                <button
-                  onClick={() => navigateToTab("messaging")}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-xs font-mono transition-all text-start cursor-pointer ${
-                    activeTab === "messaging"
-                      ? "bg-[#C5A021]/15 text-[#C5A021] border-s-4 border-[#C5A021] font-bold"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <HelpCircle className="w-4 h-4 flex-shrink-0 text-blue-300" />
-                  <span>{isAr ? "الرسائل والإشعارات" : "Messaging & Alerts"}</span>
-                </button>
               </>
             )}
           </nav>
 
-          {/* Sidebar Footer Controls */}
-          <div className="p-4 border-t border-white/10 bg-[#122846]/60 space-y-2">
+          {/* SIDEBAR FOOTER - FULLY RESTORED (الصورة الأولى) */}
+          <div className="p-4 border-t border-white/10 bg-[#122846]/80 space-y-2.5">
+            {/* الاشتراكات والترقية */}
             <button
               onClick={() => {
                 setShowSubscriptionModal(true);
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-between p-2.5 bg-gradient-to-r from-[#C5A021]/20 to-amber-500/10 hover:from-[#C5A021]/30 hover:to-amber-500/20 border border-[#C5A021]/40 rounded-lg text-xs font-mono text-[#C5A021] font-bold transition-all cursor-pointer"
+              className="w-full flex items-center justify-between p-2.5 bg-[#1A365D] hover:bg-[#C5A021]/20 border border-[#C5A021]/40 rounded-xl text-xs font-mono text-[#C5A021] font-bold transition-all cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-amber-400" />
-                <span>{isAr ? "الاشتراك المتقدم" : "Pro Plan"}</span>
+                <span>{isAr ? "الاشتراكات والترقية" : "Subscriptions & Upgrades"}</span>
               </div>
-              <span className="text-[10px] bg-[#C5A021] text-[#1A365D] px-1.5 py-0.5 rounded font-bold">PRO</span>
+              <span className="text-[10px] bg-[#C5A021] text-[#1A365D] px-2 py-0.5 rounded-full font-bold">
+                {isAr ? "معلم محترف" : "Pro"}
+              </span>
             </button>
 
-            <div className="flex items-center justify-between pt-1">
-              <button
-                onClick={() => {
-                  setShowLegalModal(true);
-                  setLegalTab("about");
-                  setMobileMenuOpen(false);
-                }}
-                className="text-[11px] font-mono text-slate-400 hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <Info className="w-3.5 h-3.5" />
-                <span>{isAr ? "عن المنصة" : "About"}</span>
-              </button>
+            {/* النسخ الاحتياطي للأرقام */}
+            <button
+              onClick={() => {
+                setShowBackupModal(true);
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-3 p-2 text-xs font-mono text-slate-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <HardDrive className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <span>{isAr ? "النسخ الاحتياطي للأرقام" : "Data Backup"}</span>
+            </button>
+
+            {/* الشروط والخصوصية */}
+            <button
+              onClick={() => {
+                setShowLegalModal(true);
+                setLegalTab("privacy");
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-3 p-2 text-xs font-mono text-slate-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <Shield className="w-4 h-4 text-blue-400 flex-shrink-0" />
+              <span>{isAr ? "الشروط والخصوصية" : "Privacy & Terms"}</span>
+            </button>
+
+            {/* الصفحة التعريفية */}
+            <button
+              onClick={() => {
+                setShowLanding(true);
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-3 p-2 text-xs font-mono text-slate-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <Home className="w-4 h-4 text-purple-400 flex-shrink-0" />
+              <span>{isAr ? "الصفحة التعريفية" : "Landing Page"}</span>
+            </button>
+
+            {/* المؤسس والرؤية */}
+            <div className="pt-2 border-t border-white/10 space-y-1">
+              <p className="text-[10px] font-mono text-slate-400 px-1 uppercase tracking-wider">
+                {isAr ? "المؤسس والرؤية" : "Founder & Vision"}
+              </p>
 
               <button
                 onClick={() => {
-                  setShowBackupModal(true);
-                  setMobileMenuOpen(false);
+                  navigateToTab("about");
                 }}
-                className="text-[11px] font-mono text-slate-400 hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+                className="w-full flex items-center gap-3 p-2 text-xs font-mono text-slate-300 hover:text-white transition-colors cursor-pointer"
               >
-                <HardDrive className="w-3.5 h-3.5" />
-                <span>{isAr ? "النسخ الاحتياطي" : "Backup"}</span>
+                <Info className="w-4 h-4 text-amber-300 flex-shrink-0" />
+                <span>{isAr ? "فلسفة وضاح الزليل" : "Waddah's Philosophy"}</span>
               </button>
             </div>
+
+            {/* بطاقة وضاح الزليل والنشر الرقمي */}
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-amber-300">
+                  {isAr ? "أ. وضاح الزليل" : "Waddah Al-Zulail"}
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {isAr ? "وضاح للنشر الرقمي" : "Waddah Digital Publishing"}
+                </span>
+              </div>
+              <div className="w-9 h-9 rounded-full bg-slate-800 border-2 border-[#C5A021] flex items-center justify-center overflow-hidden">
+                <WaddahAvatarSymbol className="w-full h-full object-cover" />
+              </div>
+            </div>
+
+            <p className="text-[9px] text-slate-400 text-center font-mono italic pt-1">
+              {isAr ? "العودة للحضور الملموس والواقعية في التربية والتدريس" : "Realism in modern education"}
+            </p>
           </div>
         </aside>
 
@@ -966,6 +827,59 @@ export default function App() {
         </main>
       </div>
 
+      {/* MOBILE FIXED BOTTOM NAVIGATION BAR - RESTORED (الصورة الثانية) */}
+      <div className="md:hidden fixed bottom-0 start-0 end-0 z-40 bg-[#122846] text-white border-t border-[#C5A021]/30 flex items-center justify-around py-1.5 px-1 shadow-2xl backdrop-blur-md">
+        <button
+          onClick={() => navigateToTab("dashboard")}
+          className={`flex flex-col items-center gap-1 p-1 min-w-[56px] transition-all cursor-pointer ${
+            activeTab === "dashboard" ? "text-[#C5A021] font-bold" : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <Layers className="w-5 h-5" />
+          <span className="text-[10px] font-mono">{isAr ? "الرئيسية" : "Home"}</span>
+        </button>
+
+        <button
+          onClick={() => navigateToTab("planner")}
+          className={`flex flex-col items-center gap-1 p-1 min-w-[56px] transition-all cursor-pointer ${
+            activeTab === "planner" ? "text-[#C5A021] font-bold" : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <BookOpen className="w-5 h-5" />
+          <span className="text-[10px] font-mono">{isAr ? "التحضير" : "Planner"}</span>
+        </button>
+
+        <button
+          onClick={() => navigateToTab("student_portal")}
+          className={`flex flex-col items-center gap-1 p-1 min-w-[56px] transition-all cursor-pointer ${
+            activeTab === "student_portal" ? "text-[#C5A021] font-bold" : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <GraduationCap className="w-5 h-5" />
+          <span className="text-[10px] font-mono">{isAr ? "الطالب" : "Student"}</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setShowSmartSearchModal(true);
+          }}
+          className="flex flex-col items-center gap-1 p-1 min-w-[56px] text-slate-400 hover:text-[#C5A021] transition-all cursor-pointer"
+        >
+          <Search className="w-5 h-5" />
+          <span className="text-[10px] font-mono">{isAr ? "البحث" : "Search"}</span>
+        </button>
+
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className={`flex flex-col items-center gap-1 p-1 min-w-[56px] transition-all cursor-pointer ${
+            mobileMenuOpen ? "text-[#C5A021] font-bold" : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <Menu className="w-5 h-5" />
+          <span className="text-[10px] font-mono">{isAr ? "القائمة" : "Menu"}</span>
+        </button>
+      </div>
+
       {/* GLOBAL MODALS CONTAINER */}
       {showProfileModal && (
         <EnhancedUserProfileModal
@@ -1036,4 +950,4 @@ export default function App() {
       )}
     </div>
   );
-                    }
+                }
